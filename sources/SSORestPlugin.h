@@ -48,5 +48,6 @@ namespace ssorest
         void addIgnoreExt(const std::string& value);
         void addIgnoreUrl(const std::string& value);
 
+        int process(request_rec* incomingRequest);
     };
 }

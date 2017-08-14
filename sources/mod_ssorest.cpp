@@ -187,7 +187,9 @@ static const char* setSSOZone(cmd_parms* command, void* /*config*/, const char* 
 static const char* setIgnoreExt(cmd_parms* command, void* /*config*/, const char* argument)
 {
     auto ssorestplugin = getSSORestPluginFrom(command->server);
-    ssorestplugin->addIgnoreExt(argument);
+    if(*argument != '.')
+        return "SSORestIgnoreExt directive should be start with '.'";
+    ssorestplugin->addIgnoreExt(argument + 1);
     return NULL;
 }
 
@@ -199,14 +201,8 @@ static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char
 }
 
 static int processRequest(request_rec* r) {
-    Logger::emerg(r, "emerg:");
-    Logger::alert(r, "alert:");
-    Logger::crit(r, "crit:");
-    Logger::error(r, "error:");
-    Logger::warning(r, "warning:");
-    Logger::notice(r, "notice:");
-    Logger::info(r, "info:");
-    Logger::debug(r, "debug:");
+    auto ssorestplugin = getSSORestPluginFrom(r->server);
+    ssorestplugin->process(r);
     return OK;
 }
 

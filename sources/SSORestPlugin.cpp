@@ -1,5 +1,7 @@
 #include "SSORestPlugin.h"
+#include "Logger.h"
 #include <http_log.h>
+#include <algorithm>
 using namespace std;
 namespace ssorest
 {    
@@ -102,4 +104,30 @@ namespace ssorest
     {
         ignoreUrl.push_back(value);
     }  
+
+    int SSORestPlugin::process(request_rec* r)
+    {
+        if(!isEnabled)
+        {
+            Logger::notice(r, "SSO/Rest Plugin is disabled");
+            return DECLINED;
+        }
+        
+        Logger::notice(r, "Processing new request");
+        
+        /* 1.Check if the request uri matches with ignored extension */
+        std::string filename(r->uri);
+        std::string fileext(filename.substr(filename.find_last_of(".") + 1));
+        if(filename != fileext && !fileext.empty())
+        {
+            if (std::find(ignoreExt.begin(), ignoreExt.end(), fileext) != ignoreExt.end())
+            {
+                Logger::notice(r, "Ignore Extension Matched");
+                return OK;
+            }
+        }
+
+        /* 2.Check if the request uri matches with ignored url */
+        return OK;
+    }
 }
