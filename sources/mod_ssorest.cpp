@@ -4,6 +4,8 @@
 #include <http_log.h>
 #include "SSORestPlugin.h"
 #include "SSORestPluginPool.h"
+#include "Logger.h"
+
 using namespace ssorest;
 
 static const char* setEnable(cmd_parms* command, void* /*config*/, const char* argument);
@@ -118,7 +120,10 @@ extern "C"
 
 namespace ssorest
 {
-
+    int getApacheModuleIndex()
+    {
+        return APLOG_MODULE_INDEX;
+    }
     static std::shared_ptr<SSORestPlugin> getSSORestPluginFrom(server_rec* server)
     {
         static SSORestPluginPool ssorestpluginPool;
@@ -194,36 +199,14 @@ static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char
 }
 
 static int processRequest(request_rec* r) {
-    ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)
-            "Evalute the Request");
-    auto ssorestplugin = getSSORestPluginFrom(r->server);
-
-    bool enabled = ssorestplugin->getEnable();
-    bool traceenabled = ssorestplugin->getTraceEnable();
-    std::string aconame = ssorestplugin->getAccountName();
-    std::string gatewayurl = ssorestplugin->getGatewayUrl();
-    std::string pluginid = ssorestplugin->getPluginId();
-    std::string secretKey = ssorestplugin->getSecretKey();
-    auto ssozone = ssorestplugin->getSSOZone();
-    auto ignoreext = ssorestplugin->getIgnoreExt();
-    auto ignoreurl = ssorestplugin->getIgnoreUrl();
-    ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"SSORestEnabled:%d", enabled);
-    ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"SSOTraceEnabled:%d", traceenabled);
-    ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"gatewayurl:%s", gatewayurl.c_str());
-    ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"pluginid:%s", pluginid.c_str());
-    ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"secretKey:%s", secretKey.c_str());
-
-    for (std::vector<std::string>::iterator it = ssozone.begin() ; it != ssozone.end(); ++it)
-        ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"ssozone:%s", (*it).c_str());
-    
-    for (std::vector<std::string>::iterator it = ignoreext.begin() ; it != ignoreext.end(); ++it)
-        ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"ignoreext:%s", (*it).c_str());
-    
-    for (std::vector<std::string>::iterator it = ignoreurl.begin() ; it != ignoreurl.end(); ++it)
-        ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"ignoreext:%s", (*it).c_str());
-    // ap_log_rerror(APLOG_MARK, APLOG_WARNING, 0, r, APLOGNO(10000)"ssozone:%s", ssozone.c_str());
-
-
+    Logger::emerg(r, "emerg:");
+    Logger::alert(r, "alert:");
+    Logger::crit(r, "crit:");
+    Logger::error(r, "error:");
+    Logger::warning(r, "warning:");
+    Logger::notice(r, "notice:");
+    Logger::info(r, "info:");
+    Logger::debug(r, "debug:");
     return OK;
 }
 
