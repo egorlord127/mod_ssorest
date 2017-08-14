@@ -114,20 +114,35 @@ namespace ssorest
         }
         
         Logger::notice(r, "Processing new request");
+
         
-        /* 1.Check if the request uri matches with ignored extension */
-        std::string filename(r->uri);
-        std::string fileext(filename.substr(filename.find_last_of(".") + 1));
-        if(filename != fileext && !fileext.empty())
+        if (r->uri)
         {
-            if (std::find(ignoreExt.begin(), ignoreExt.end(), fileext) != ignoreExt.end())
+            /* 1.Check if the request uri matches with ignored extension */
+            std::string filename(r->uri);
+            std::string fileext(filename.substr(filename.find_last_of(".") + 1));
+            if (!fileext.empty() && filename != fileext)
             {
-                Logger::notice(r, "Ignore Extension Matched");
-                return OK;
+                if (std::find(ignoreExt.begin(), ignoreExt.end(), fileext) != ignoreExt.end())
+                {
+                    Logger::notice(r, "Ignore Extension Matched");
+                    return OK;
+                }
+            }
+
+            /* 2.Check if the request uri matches with ignored url */
+            for (auto it = ignoreUrl.begin() ; it != ignoreUrl.end(); ++it)
+            {
+                std::string uri(r->uri);
+                if (uri.find(*it) != std::string::npos)
+                {
+                    Logger::notice(r, "Ignore Url Matched");
+                    return OK;
+                }
             }
         }
+        
 
-        /* 2.Check if the request uri matches with ignored url */
         return OK;
     }
 }

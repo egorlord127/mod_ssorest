@@ -196,6 +196,8 @@ static const char* setIgnoreExt(cmd_parms* command, void* /*config*/, const char
 static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char* argument)
 {
     auto ssorestplugin = getSSORestPluginFrom(command->server);
+    if(*argument != '/')
+        return "SSORestIgnoreUrl directive should be start with '/'";
     ssorestplugin->addIgnoreUrl(argument);
     return NULL;
 }
