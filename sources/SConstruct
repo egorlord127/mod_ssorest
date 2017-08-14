@@ -61,7 +61,9 @@ if not environment.GetOption('clean'):
         print "Platform '" + platform + "' is not supported"
         sys.exit(1)
     	
-sources = [ 'SSORestPlugin.cpp',
+sources = [ 'Base64.cpp',
+            'CurlWrapper.cpp',
+            'SSORestPlugin.cpp',
             'SSORestPluginPool.cpp',
             'mod_ssorest.cpp']
 
