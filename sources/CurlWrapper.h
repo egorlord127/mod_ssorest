@@ -6,7 +6,7 @@
 #include <vector>
 
 
-namespace idfc
+namespace ssorest
 {
     class CurlWrapper
     {

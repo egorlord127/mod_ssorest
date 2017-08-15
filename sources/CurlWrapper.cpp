@@ -5,7 +5,7 @@
 
 #include "CurlWrapper.h"
 
-namespace idfc
+namespace ssorest
 {       
     CurlWrapper::CurlWrapper() : curl(nullptr)
     {

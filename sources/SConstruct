@@ -63,6 +63,9 @@ if not environment.GetOption('clean'):
     	
 sources = [ 'Base64.cpp',
             'CurlWrapper.cpp',
+            'TypesConverter.cpp',
+            'NetworkInfo.cpp',
+            'GatewayRequest.cpp',
             'SSORestPlugin.cpp',
             'SSORestPluginPool.cpp',
             'mod_ssorest.cpp']

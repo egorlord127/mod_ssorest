@@ -1,12 +1,22 @@
 #include "SSORestPlugin.h"
+#include "GatewayRequest.h"
 #include "Logger.h"
+#include "NetworkInfo.h"
 #include <http_log.h>
 #include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
+
+
 using namespace std;
 namespace ssorest
 {    
     SSORestPlugin::SSORestPlugin()
     : isEnabled(false)
+    , fqdn(NetworkInfo().getFQDN())
     {
         
     }
@@ -105,8 +115,14 @@ namespace ssorest
         ignoreUrl.push_back(value);
     }  
 
+    void SSORestPlugin::setExtendedDumpFile(const std::string& value)
+    {
+        extentededDumpFileName = value;
+    }
+
     int SSORestPlugin::process(request_rec* r)
     {
+        sourceRequest = r;
         if(!isEnabled)
         {
             Logger::notice(r, "SSO/Rest Plugin is disabled");
@@ -140,9 +156,28 @@ namespace ssorest
                     return OK;
                 }
             }
+
+            GatewayRequest gatewayRequest(r, "ABC");
+            Json::StyledWriter styledWriter;
+            appendToExtendedDump(std::string("GatewayRequest: ") + styledWriter.write(gatewayRequest.getPayload()));
         }
         
 
         return OK;
+    }
+
+    void SSORestPlugin::appendToExtendedDump(const std::string& information) const
+    {
+        if (!extentededDumpFileName.empty())
+        {
+            std::ofstream dumpFile(extentededDumpFileName, std::ofstream::out | std::ofstream::app);
+            if (dumpFile.is_open())
+            {
+                dumpFile << information << std::endl;
+                dumpFile.close();
+            } else {
+                Logger::notice(sourceRequest, "File do not exist, or have no permission to open");
+            }
+        }
     }
 }

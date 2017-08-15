@@ -28,7 +28,7 @@
 #include "Base64.h"
 #include <iostream>
 
-namespace idfc 
+namespace ssorest 
 {
 static const std::string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -123,4 +123,4 @@ std::string base64_decode(std::string const& encoded_string) {
 
   return ret;
 }
-} // namespace idfc
+} // namespace ssorest

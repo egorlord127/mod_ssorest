@@ -2,7 +2,7 @@
 
 #include <curl/curl.h>
 
-namespace idfc
+namespace ssorest
 {
     class CurlList
     {
