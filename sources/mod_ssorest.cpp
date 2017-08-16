@@ -221,9 +221,8 @@ static const char* setExtendedDumpFile(cmd_parms* command, void* /*config*/, con
 }
 
 static int processRequest(request_rec* r) {
-    ap_log_error(APLOG_MARK, APLOG_CRIT, 0, r->server, "\n%d\t%d\n%d", r->method_number, r->method_number, r->method_number);
-    // auto ssorestplugin = getSSORestPluginFrom(r->server);
-    // ssorestplugin->process(r);
+    auto ssorestplugin = getSSORestPluginFrom(r->server);
+    ssorestplugin->process(r);
     return OK;
 }
 

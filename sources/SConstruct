@@ -63,6 +63,7 @@ if not environment.GetOption('clean'):
     	
 sources = [ 'Base64.cpp',
             'CurlWrapper.cpp',
+            'StringProcessor.cpp',
             'TypesConverter.cpp',
             'NetworkInfo.cpp',
             'GatewayRequest.cpp',

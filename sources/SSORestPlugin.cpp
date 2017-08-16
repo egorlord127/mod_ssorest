@@ -2,6 +2,8 @@
 #include "GatewayRequest.h"
 #include "Logger.h"
 #include "NetworkInfo.h"
+#include "StringProcessor.h"
+
 #include <http_log.h>
 #include <algorithm>
 #include <iostream>
@@ -157,9 +159,12 @@ namespace ssorest
                 }
             }
 
-            GatewayRequest gatewayRequest(r, "ABC");
-            Json::StyledWriter styledWriter;
-            appendToExtendedDump(std::string("GatewayRequest: ") + styledWriter.write(gatewayRequest.getPayload()));
+            GatewayRequest gatewayRequest(r, fqdn);
+            auto jsonRequestArray = StringProcessor::split(gatewayRequest.getPayload().toStyledString(), "\n");
+            for(std::vector<string>::iterator it = jsonRequestArray.begin(); it != jsonRequestArray.end(); ++it)
+            {
+                Logger::notice(r, "%s", (*it).c_str());
+            }
         }
         
 
