@@ -1,27 +1,25 @@
 #include "GatewayRequest.h"
 #include "TypesConverter.h"
 #include "StringBuilder.h"
+#include "Logger.h"
 
 #include <http_request.h>
 #include <http_core.h>
 namespace ssorest
 {
-    GatewayRequest::GatewayRequest(const request_rec* sourceRequest, const std::string& fqdn)
+    GatewayRequest::GatewayRequest(request_rec* sourceRequest, const std::string& fqdn)
     : server(sourceRequest->server)
     , scheme(getScheme(sourceRequest))
     {
         // TODO: 
         // method
-        auto requestMethod = TypesConverter::toStringSafety(sourceRequest->method);
-        jsonData["method"] = requestMethod;
+        jsonData["method"] = TypesConverter::toStringSafety(sourceRequest->method);
         
         // url
-        auto url = scheme + "://" + std::string(sourceRequest->hostname) + sourceRequest->unparsed_uri;
-        jsonData["url"] = url;
+        jsonData["url"] = scheme + "://" + TypesConverter::toStringSafety(sourceRequest->hostname) + TypesConverter::toStringSafety(sourceRequest->unparsed_uri);
         
         // protocol
-        auto serverProtocol = TypesConverter::toStringSafety(sourceRequest->protocol);
-        jsonData["protocol"] = serverProtocol;
+        jsonData["protocol"] = TypesConverter::toStringSafety(sourceRequest->protocol);
         
         // characterEncoding
         jsonData["characterEncoding"] = TypesConverter::toStringSafety(sourceRequest->content_encoding);
@@ -30,33 +28,28 @@ namespace ssorest
         jsonData["contentLength"] = static_cast<Json::Value::UInt>(sourceRequest->clength);
 
         // contentType
-        auto contentType = TypesConverter::toStringSafety(sourceRequest->content_type);
-        jsonData["contentType"] = contentType;
+        jsonData["contentType"] = TypesConverter::toStringSafety(sourceRequest->content_type);
 
         // contextPath
-        jsonData["contextPath"] = getContextPath(sourceRequest);
+        jsonData["contextPath"] = TypesConverter::toStringSafety(ap_document_root(sourceRequest));
         
         // localAddr
-        auto localAddr = TypesConverter::toStringSafety(sourceRequest->connection->local_ip);
-        jsonData["localAddr"] = localAddr;
+        jsonData["localAddr"] = TypesConverter::toStringSafety(sourceRequest->connection->local_ip);
 
         // localName
-        jsonData["localName"] = TypesConverter::toStringSafety(sourceRequest->connection->local_host);
+        jsonData["localName"] = TypesConverter::toStringSafety(sourceRequest->server->server_hostname);
         
         // localPort
-        jsonData["localPort"] = sourceRequest->server->port;
+        jsonData["localPort"] = static_cast<Json::Value::UInt>(getServerPort(sourceRequest));
         
         // remoteAddr
-        auto remoteAddr = TypesConverter::toStringSafety(sourceRequest->useragent_ip);
-        jsonData["remoteAddr"] = remoteAddr;
+        jsonData["remoteAddr"] = TypesConverter::toStringSafety(sourceRequest->useragent_ip);
         
         // remoteHost
-        auto remoteHost = ap_get_remote_host(sourceRequest->connection, sourceRequest->per_dir_config, REMOTE_NAME, NULL);
-        jsonData["remoteHost"] = remoteHost;
+        jsonData["remoteHost"] = TypesConverter::toStringSafety(sourceRequest->useragent_ip);
         
         // remotePort
-        auto remotePort = sourceRequest->useragent_addr->port;
-        jsonData["remotePort"] = remotePort;
+        jsonData["remotePort"] = static_cast<Json::Value::UInt>(sourceRequest->useragent_addr->port);
         
         // secure
         jsonData["secure"] = isSecureProtocol();
@@ -65,26 +58,56 @@ namespace ssorest
         jsonData["scheme"] = scheme;
 
         // serverName
-        jsonData["serverName"] = fqdn;
+        jsonData["serverName"] = TypesConverter::toStringSafety(sourceRequest->server->server_hostname);
         
         // serverPort
-        auto serverPort = sourceRequest->server->port;
-        jsonData["serverPort"] = serverPort;
+        jsonData["serverPort"] = static_cast<Json::Value::UInt>(getServerPort(sourceRequest));
         
         // servletPath
         jsonData["servletPath"] = std::string();
 
-        auto emptyArray = Json::Value(Json::arrayValue);
-        auto contentLanguages = TypesConverter::toVector(sourceRequest->content_languages);
-        if (!contentLanguages.empty())
-        {
-            Json::Value jsonLocales;
-            for (auto& contentLanguage : contentLanguages)
-                jsonLocales.append(contentLanguage);
-            jsonData["locales"] = jsonLocales;
-        }
-        else jsonData["locales"] = emptyArray;
+        // TODO: locale
 
+        // headers
+        auto headers = TypesConverter::toMap(sourceRequest->headers_in);
+        Json::Value jsonHeaders;
+
+        // accept-language
+        Json::Value jsonHeadersAcceptLanguage = Json::Value(Json::arrayValue);
+        jsonHeadersAcceptLanguage.append(headers["Accept-Language"]);
+        jsonHeaders["accept-language"] = jsonHeadersAcceptLanguage;
+        
+        // Cookie
+        
+        // connection
+        Json::Value jsonHeadersConnection = Json::Value(Json::arrayValue);
+        jsonHeadersConnection.append(headers["Connection"]);
+        jsonHeaders["connection"] = jsonHeadersConnection;
+
+        // accept
+        Json::Value jsonHeadersAccept = Json::Value(Json::arrayValue);
+        jsonHeadersAccept.append(headers["Accept"]);
+        jsonHeaders["accept"] = jsonHeadersAccept;
+
+        // accept-encoding
+        Json::Value jsonHeadersAcceptEncoding = Json::Value(Json::arrayValue);
+        jsonHeadersAcceptEncoding.append(headers["Accept-Encoding"]);
+        jsonHeaders["accept-encodinge"] = jsonHeadersAcceptEncoding;
+
+        // user-agent
+        Json::Value jsonHeadersUserAgent = Json::Value(Json::arrayValue);
+        jsonHeadersUserAgent.append(headers["User-Agent"]);
+        jsonHeaders["user-agent"] = jsonHeadersUserAgent;
+
+        jsonData["headers"] = jsonHeaders;
+        // for (auto& header : headers)
+        // {
+        //     auto headerName = header.first;
+        //     auto& headerValue = header.second;
+
+        //     Logger::emerg(server, "headername:%s", headerName.c_str());
+        //     Logger::emerg(server, "headervalue:%s", headerValue.c_str());
+        // }
     }
     std::string GatewayRequest::getScheme(const request_rec* request)
     {
@@ -103,16 +126,6 @@ namespace ssorest
     bool GatewayRequest::isSecureProtocol() const
     {
         return (scheme == "https");
-    }
-    
-    std::string GatewayRequest::getContextPath(const request_rec* request) const
-    {
-        auto url = scheme + "://" + request->hostname;
-        auto currentPort = getServerPort(request);
-        auto defaultPort = isSecureProtocol() ? 443 : 80;
-        if (currentPort != 0 && currentPort != defaultPort)
-            url += std::string(StringBuilder() << ':' << currentPort);
-        return url;
     }
     
     int GatewayRequest::getServerPort(const request_rec* request)
