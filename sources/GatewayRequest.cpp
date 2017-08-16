@@ -69,7 +69,7 @@ namespace ssorest
 
         // TODO: locale
 
-        // headers
+        // headers Array
         auto headers = TypesConverter::toMap(sourceRequest->headers_in);
         Json::Value jsonHeaders;
 
@@ -108,14 +108,23 @@ namespace ssorest
         jsonHeaders["user-agent"] = jsonHeadersUserAgent;
 
         jsonData["headers"] = jsonHeaders;
-        // for (auto& header : headers)
-        // {
-        //     auto headerName = header.first;
-        //     auto& headerValue = header.second;
 
-        //     Logger::emerg(server, "headername:%s", headerName.c_str());
-        //     Logger::emerg(server, "headervalue:%s", headerValue.c_str());
-        // }
+        // cookies Array
+        Json::Value javaCookies;
+        auto unparsedPairs = StringProcessor::split(headers["Cookie"], ";");
+        for (const auto& unparsedPair : unparsedPairs)
+        {
+            auto cookieKeyValue = StringProcessor::split(unparsedPair, "=");
+            if (cookieKeyValue.size() == 2)
+            {
+                Json::Value javaCookie;
+                javaCookie["name"] = StringProcessor::trimmed(cookieKeyValue[0]);
+                javaCookie["value"] = StringProcessor::trimmed(cookieKeyValue[1]);
+                javaCookies.append(javaCookie);
+            }
+        }
+        jsonData["cookies"] = javaCookies;
+
     }
     std::string GatewayRequest::getScheme(const request_rec* request)
     {
