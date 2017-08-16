@@ -96,4 +96,52 @@ namespace ssorest
         }
         return std::string();
     }
+
+    static void StringProcessor::decode(const std::string str, std::string& decodedStr)
+    {
+        std::string::const_iterator it  = str.begin();
+        std::string::const_iterator end = str.end();
+        while (it != end)
+        {
+            char c = *it++;
+            if (c == '+') 
+                c = ' ';
+            else if (c == '%')
+            {
+                if (it == end) 
+                {
+                    // TODO: Error Handling
+                }
+                char hi = *it++;
+                if (it == end) 
+                {
+                    // TODO: Error Handling
+                }
+                char lo = *it++;
+
+                if (hi >= '0' && hi <= '9')
+                    c = hi - '0';
+                else if (hi >= 'A' && hi <= 'F')
+                    c = hi - 'A' + 10;
+                else if (hi >= 'a' && hi <= 'f')
+                    c = hi - 'a' + 10;
+                else 
+                {
+                    // TODO: Error Handling
+                }
+                c *= 16;
+                if (lo >= '0' && lo <= '9')
+                    c += lo - '0';
+                else if (lo >= 'A' && lo <= 'F')
+                    c += lo - 'A' + 10;
+                else if (lo >= 'a' && lo <= 'f')
+                    c += lo - 'a' + 10;
+                else
+                {
+                    // TODO: Error Handling
+                }
+            }
+            decodedStr += c;
+        }
+    }
 }

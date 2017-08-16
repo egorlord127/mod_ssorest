@@ -140,6 +140,7 @@ namespace ssorest
             {
                 Json::Value jsonParameter = Json::Value(Json::arrayValue);
                 jsonParameter.append(StringProcessor::trimmed(parameterKeyValue[1]));
+                // TODO: URL Decode
                 jsonParametersArray[StringProcessor::trimmed(parameterKeyValue[0])] = jsonParameter;
             }
         }

@@ -4,6 +4,7 @@
 #include <http_log.h>
 #include "SSORestPlugin.h"
 #include "SSORestPluginPool.h"
+#include "StringProcessor.h"
 #include "Logger.h"
 
 using namespace ssorest;
