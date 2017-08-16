@@ -1,6 +1,7 @@
 #include "GatewayRequest.h"
 #include "TypesConverter.h"
 #include "StringBuilder.h"
+#include "StringProcessor.h"
 #include "Logger.h"
 
 #include <http_request.h>
@@ -78,7 +79,14 @@ namespace ssorest
         jsonHeaders["accept-language"] = jsonHeadersAcceptLanguage;
         
         // Cookie
-        
+        Json::Value jsonHeadersCookie = Json::Value(Json::arrayValue);
+        auto cookies = StringProcessor::split(headers["Cookie"], "; ");
+        for (std::vector<std::string>::iterator it = cookies.begin(); it != cookies.end(); ++it)
+        {
+            jsonHeadersCookie.append((*it));
+        }
+        jsonHeaders["COOKIE"] = jsonHeadersCookie;
+
         // connection
         Json::Value jsonHeadersConnection = Json::Value(Json::arrayValue);
         jsonHeadersConnection.append(headers["Connection"]);
