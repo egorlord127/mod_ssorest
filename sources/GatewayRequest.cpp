@@ -74,38 +74,43 @@ namespace ssorest
         Json::Value jsonHeaders;
 
         // accept-language
-        Json::Value jsonHeadersAcceptLanguage = Json::Value(Json::arrayValue);
-        jsonHeadersAcceptLanguage.append(headers["Accept-Language"]);
-        jsonHeaders["accept-language"] = jsonHeadersAcceptLanguage;
+        Json::Value jsonHeaderAcceptLanguage = Json::Value(Json::arrayValue);
+        jsonHeaderAcceptLanguage.append(headers["Accept-Language"]);
+        jsonHeaders["accept-language"] = jsonHeaderAcceptLanguage;
         
         // Cookie
-        Json::Value jsonHeadersCookie = Json::Value(Json::arrayValue);
+        Json::Value jsonHeaderCookie = Json::Value(Json::arrayValue);
         auto cookies = StringProcessor::split(headers["Cookie"], "; ");
         for (std::vector<std::string>::iterator it = cookies.begin(); it != cookies.end(); ++it)
         {
-            jsonHeadersCookie.append((*it));
+            jsonHeaderCookie.append((*it));
         }
-        jsonHeaders["COOKIE"] = jsonHeadersCookie;
+        jsonHeaders["COOKIE"] = jsonHeaderCookie;
 
         // connection
-        Json::Value jsonHeadersConnection = Json::Value(Json::arrayValue);
-        jsonHeadersConnection.append(headers["Connection"]);
-        jsonHeaders["connection"] = jsonHeadersConnection;
+        Json::Value jsonHeaderConnection = Json::Value(Json::arrayValue);
+        jsonHeaderConnection.append(headers["Connection"]);
+        jsonHeaders["connection"] = jsonHeaderConnection;
 
         // accept
-        Json::Value jsonHeadersAccept = Json::Value(Json::arrayValue);
-        jsonHeadersAccept.append(headers["Accept"]);
-        jsonHeaders["accept"] = jsonHeadersAccept;
+        Json::Value jsonHeaderAccept = Json::Value(Json::arrayValue);
+        jsonHeaderAccept.append(headers["Accept"]);
+        jsonHeaders["accept"] = jsonHeaderAccept;
+
+        // host
+        Json::Value jsonHeaderHost = Json::Value(Json::arrayValue);
+        jsonHeaderHost.append(headers["Host"]);
+        jsonHeaders["host"] = jsonHeaderHost;
 
         // accept-encoding
-        Json::Value jsonHeadersAcceptEncoding = Json::Value(Json::arrayValue);
-        jsonHeadersAcceptEncoding.append(headers["Accept-Encoding"]);
-        jsonHeaders["accept-encodinge"] = jsonHeadersAcceptEncoding;
+        Json::Value jsonHeaderAcceptEncoding = Json::Value(Json::arrayValue);
+        jsonHeaderAcceptEncoding.append(headers["Accept-Encoding"]);
+        jsonHeaders["accept-encoding"] = jsonHeaderAcceptEncoding;
 
         // user-agent
-        Json::Value jsonHeadersUserAgent = Json::Value(Json::arrayValue);
-        jsonHeadersUserAgent.append(headers["User-Agent"]);
-        jsonHeaders["user-agent"] = jsonHeadersUserAgent;
+        Json::Value jsonHeaderUserAgent = Json::Value(Json::arrayValue);
+        jsonHeaderUserAgent.append(headers["User-Agent"]);
+        jsonHeaders["user-agent"] = jsonHeaderUserAgent;
 
         jsonData["headers"] = jsonHeaders;
 
