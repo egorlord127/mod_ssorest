@@ -139,8 +139,9 @@ namespace ssorest
             if (parameterKeyValue.size() == 2)
             {
                 Json::Value jsonParameter = Json::Value(Json::arrayValue);
-                jsonParameter.append(StringProcessor::trimmed(parameterKeyValue[1]));
-                // TODO: URL Decode
+                std::string decodedStr;;
+                StringProcessor::decode(StringProcessor::trimmed(parameterKeyValue[1]), decodedStr);
+                jsonParameter.append(decodedStr);
                 jsonParametersArray[StringProcessor::trimmed(parameterKeyValue[0])] = jsonParameter;
             }
         }
