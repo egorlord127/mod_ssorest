@@ -115,20 +115,35 @@ namespace ssorest
         jsonData["headers"] = jsonHeaders;
 
         // cookies Array
-        Json::Value javaCookies;
+        Json::Value jsonCookieArray = Json::Value(Json::arrayValue);
         auto unparsedPairs = StringProcessor::split(headers["Cookie"], ";");
         for (const auto& unparsedPair : unparsedPairs)
         {
             auto cookieKeyValue = StringProcessor::split(unparsedPair, "=");
             if (cookieKeyValue.size() == 2)
             {
-                Json::Value javaCookie;
-                javaCookie["name"] = StringProcessor::trimmed(cookieKeyValue[0]);
-                javaCookie["value"] = StringProcessor::trimmed(cookieKeyValue[1]);
-                javaCookies.append(javaCookie);
+                Json::Value jsonCookie;
+                jsonCookie["name"] = StringProcessor::trimmed(cookieKeyValue[0]);
+                jsonCookie["value"] = StringProcessor::trimmed(cookieKeyValue[1]);
+                jsonCookieArray.append(jsonCookie);
             }
         }
-        jsonData["cookies"] = javaCookies;
+        jsonData["cookies"] = jsonCookieArray;
+
+        // parameter Array
+        Json::Value jsonParametersArray = Json::Value(Json::objectValue);
+        auto parameters = StringProcessor::split(TypesConverter::toStringSafety(sourceRequest->parsed_uri.query), "&");
+        for (const auto& parameter : parameters)
+        {
+            auto parameterKeyValue = StringProcessor::split(parameter, "=");
+            if (parameterKeyValue.size() == 2)
+            {
+                Json::Value jsonParameter = Json::Value(Json::arrayValue);
+                jsonParameter.append(StringProcessor::trimmed(parameterKeyValue[1]));
+                jsonParametersArray[StringProcessor::trimmed(parameterKeyValue[0])] = jsonParameter;
+            }
+        }
+        jsonData["parameters"] = jsonParametersArray;
 
     }
     std::string GatewayRequest::getScheme(const request_rec* request)
