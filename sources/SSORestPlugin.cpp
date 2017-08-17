@@ -7,6 +7,7 @@
 #include "Cryptography/Cryptor.h"
 #include "Base64.h"
 #include "RandomSequence.h"
+#include "URI.h"
 #include <http_log.h>
 #include <algorithm>
 #include <iostream>
@@ -192,7 +193,7 @@ namespace ssorest
                     Logger::notice(r, "Generated HMAC: %s", signedRandomText.c_str());
                     
                     std::string encodedSignedRandomText;
-                    StringProcessor::encode(signedRandomText, encodedSignedRandomText);
+                    URI::encode(signedRandomText, encodedSignedRandomText);
                     
                     gatewayRequest.set(GatewayRequest::randomText, randomText);
                     gatewayRequest.set(GatewayRequest::randomTextSigned, encodedSignedRandomText);

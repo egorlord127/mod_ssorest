@@ -6,7 +6,7 @@
 #include "SSORestPluginPool.h"
 #include "StringProcessor.h"
 #include "Logger.h"
-
+#include "URI.h"
 using namespace ssorest;
 
 static const char* setEnable(cmd_parms* command, void* /*config*/, const char* argument);
@@ -205,8 +205,14 @@ static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char
 }
 
 static int processRequest(request_rec* r) {
-    auto ssorestplugin = getSSORestPluginFrom(r->server);
-    ssorestplugin->process(r);
+    // auto ssorestplugin = getSSORestPluginFrom(r->server);
+    // ssorestplugin->process(r);
+    std::string encodedStr;
+    std::string decodedStr;
+    URI::encode(std::string("https://www.urlencoder.org/"), encodedStr);
+    Logger::emerg(r, "Encoded:%s", encodedStr.c_str());
+    URI::decode(encodedStr, decodedStr);
+    Logger::emerg(r, "Decoded:%s", decodedStr.c_str());
     return OK;
 }
 

@@ -17,7 +17,5 @@ namespace ssorest
         static void replace(std::string& source, char oldChar, char newChar);
         static std::vector<std::string> split(const std::string& source, const std::string& delimiter);
         static std::string getExtension(const std::string& source, char pathDelimiter);
-        static void decode(const std::string str, std::string& decodedStr);
-        static void encode(const std::string& str, std::string& encodedStr);
     };
 }

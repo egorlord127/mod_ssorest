@@ -4,6 +4,7 @@
 #include "StringProcessor.h"
 #include "CurlWrapper.h"
 #include "CurlList.h"
+#include "URI.h"
 #include <algorithm>
 #include <http_request.h>
 #include <http_core.h>
@@ -187,7 +188,7 @@ namespace ssorest
             {
                 auto currentParamName = StringProcessor::trimmed(parameterKeyValue[0]);
                 std::string decodedStr;
-                StringProcessor::decode(StringProcessor::trimmed(parameterKeyValue[1]), decodedStr);
+                URI::decode(StringProcessor::trimmed(parameterKeyValue[1]), decodedStr);
                 if(previousParamName != currentParamName)
                 {
                     jsonParametersArray[previousParamName] = jsonParameter;
