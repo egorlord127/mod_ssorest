@@ -2,7 +2,6 @@
 #include "GatewayRequest.h"
 #include "GatewayResponse.h"
 #include "Logger.h"
-#include "NetworkInfo.h"
 #include "StringProcessor.h"
 #include "Cryptography/Cryptor.h"
 #include "Base64.h"
@@ -22,7 +21,6 @@ namespace ssorest
 {    
     SSORestPlugin::SSORestPlugin()
     : isEnabled(false)
-    , fqdn(NetworkInfo().getFQDN())
     {
         gatewayToken = std::string();        
     }

@@ -272,36 +272,6 @@ namespace ssorest
         return response;
     }
 
-    void GatewayRequest::setAcoName(const std::string& value)
-    {
-        if(!value.empty())
-            jsonData["attributes"]["acoName"] = value;
-    }
-
-    void GatewayRequest::setPluginId(const std::string& value)
-    {
-        if(!value.empty())
-            jsonData["attributes"]["pluginID"] = value;
-    }
-    
-    void GatewayRequest::setRandomtext(const std::string& value)
-    {
-        if(!value.empty())
-            jsonData["attributes"]["randomText"] = value;
-    }
-    
-    void GatewayRequest::setRandomtextSigned(const std::string& value)
-    {
-        if(!value.empty())
-            jsonData["attributes"]["randomTextSigned"] = value;
-    }
-
-    void GatewayRequest::setGatewayToken(const std::string& value)
-    {
-        if(!value.empty())
-            jsonData["attributes"]["gatewayToken"] = value;
-    }
-
     void GatewayRequest::set(const std::string& key, const std::string& value)
     {
         auto detachedValue = new std::string(value);

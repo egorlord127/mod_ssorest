@@ -18,16 +18,10 @@ namespace ssorest
         void buildJsonRequest();
         const Json::Value& getPayload() const;
         std::string sendTo(const std::string& gatewayUrl) const;
-        void setAcoName(const std::string& value);
-        void setPluginId(const std::string& value);
-        void setRandomtext(const std::string& value);
-        void setRandomtextSigned(const std::string& value);
-        void setGatewayToken(const std::string& value);
 
     private:
         static std::string getScheme(const request_rec* request);
         static int getServerPort(const request_rec* request);
-        void verifyThatSourceRequestIsDefined() const;
         bool isSecureProtocol() const;
     
     public:
