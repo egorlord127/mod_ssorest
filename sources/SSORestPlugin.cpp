@@ -1,5 +1,6 @@
 #include "SSORestPlugin.h"
 #include "GatewayRequest.h"
+#include "GatewayResponse.h"
 #include "Logger.h"
 #include "NetworkInfo.h"
 #include "StringProcessor.h"
@@ -163,8 +164,9 @@ namespace ssorest
             gatewayRequest.setPluginId(pluginId);
             gatewayRequest.setAcoName(acoName);
 
-            auto response = gatewayRequest.sendTo(gatewayUrl);
-            Logger::styledDebug(r, response);
+            GatewayResponse response(gatewayRequest.sendTo(gatewayUrl));
+            auto jsonResponse = response.getJsonResponse();
+            Logger::styledDebug(r, jsonResponse.toStyledString());
         }
         
 

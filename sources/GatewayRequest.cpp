@@ -146,9 +146,13 @@ namespace ssorest
         std::sort(parameters.begin(), parameters.end());
         
         // first element
-        auto firstParameter = StringProcessor::split(parameters[0], "=");
-        std::string previousParamName =  StringProcessor::trimmed(firstParameter[0]);
-        
+        std::vector<std::string> firstParameter;
+        std::string previousParamName;
+        if (parameters.size() > 0)
+        {
+            firstParameter = StringProcessor::split(parameters[0], "=");
+            previousParamName =  StringProcessor::trimmed(firstParameter[0]);
+        }
         Json::Value jsonParameter = Json::Value(Json::arrayValue);
         for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); ++it)
         {
@@ -172,10 +176,7 @@ namespace ssorest
         jsonData["parameters"] = jsonParametersArray;
 
         // Attributes Array
-        Json::Value jsonAttributes;
-        jsonAttributes["pluginID"] = 
-        jsonAttributes["acoName"] = 
-        jsonData["attributes"] = jsonAttributes;
+
     }
     std::string GatewayRequest::getScheme(const request_rec* request)
     {

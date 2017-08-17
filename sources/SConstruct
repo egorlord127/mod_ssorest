@@ -67,6 +67,7 @@ sources = [ 'Base64.cpp',
             'TypesConverter.cpp',
             'NetworkInfo.cpp',
             'GatewayRequest.cpp',
+            'GatewayResponse.cpp',
             'SSORestPlugin.cpp',
             'SSORestPluginPool.cpp',
             'mod_ssorest.cpp']
