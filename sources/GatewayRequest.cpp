@@ -5,6 +5,7 @@
 #include "CurlWrapper.h"
 #include "CurlList.h"
 #include "URI.h"
+#include "Logger.h"
 #include <algorithm>
 #include <http_request.h>
 #include <http_core.h>
@@ -38,7 +39,7 @@ namespace ssorest
         scheme = getScheme(request);
     }
     
-    void GatewayRequest::buildJsonRequest()
+    void GatewayRequest::buildJsonRequest(const std::vector<std::string>& ssoZone)
     {
         // method
         jsonData["method"] = TypesConverter::toStringSafety(request->method);
@@ -116,13 +117,13 @@ namespace ssorest
         jsonHeaders["accept-language"] = jsonHeaderAcceptLanguage;
         
         // Cookie
-        Json::Value jsonHeaderCookie = Json::Value(Json::arrayValue);
-        auto cookies = StringProcessor::split(headers["Cookie"], "; ");
-        for (std::vector<std::string>::iterator it = cookies.begin(); it != cookies.end(); ++it)
-        {
-            jsonHeaderCookie.append((*it));
-        }
-        jsonHeaders["COOKIE"] = jsonHeaderCookie;
+        // Json::Value jsonHeaderCookie = Json::Value(Json::arrayValue);
+        // auto cookies = StringProcessor::split(headers["Cookie"], "; ");
+        // for (std::vector<std::string>::iterator it = cookies.begin(); it != cookies.end(); ++it)
+        // {
+        //     jsonHeaderCookie.append((*it));
+        // }
+        // jsonHeaders["COOKIE"] = jsonHeaderCookie;
 
         // connection
         Json::Value jsonHeaderConnection = Json::Value(Json::arrayValue);
@@ -160,9 +161,24 @@ namespace ssorest
             if (cookieKeyValue.size() == 2)
             {
                 Json::Value jsonCookie;
-                jsonCookie["name"] = StringProcessor::trimmed(cookieKeyValue[0]);
-                jsonCookie["value"] = StringProcessor::trimmed(cookieKeyValue[1]);
-                jsonCookieArray.append(jsonCookie);
+                std::string cookieName = StringProcessor::trimmed(cookieKeyValue[0]);
+                bool flag = true;
+                for (const auto& zone : ssoZone)
+                {
+                    if ( cookieName.find(zone) != std::string::npos)
+                    {
+                        std::string cookieValue = StringProcessor::trimmed(cookieKeyValue[1]);
+                        Logger::emerg(request, "Transferring request cookie to JSon payload: %s=%s", cookieName.c_str(), cookieValue.c_str());
+                        jsonCookie["name"] = cookieName;
+                        jsonCookie["value"] = cookieValue;
+                        jsonCookieArray.append(jsonCookie);
+                        flag = false;
+                        break;
+                    }
+                }
+
+                if(flag)
+                    Logger::emerg(request, "Skipping request cookie outside of our zone: %s", cookieName.c_str());
             }
         }
         jsonData["cookies"] = jsonCookieArray;

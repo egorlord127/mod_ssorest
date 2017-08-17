@@ -165,7 +165,7 @@ namespace ssorest
             gatewayRequest.set(GatewayRequest::acoName, acoName);
             gatewayRequest.set(GatewayRequest::pluginId, pluginId);
             gatewayRequest.set(GatewayRequest::gatewayToken, gatewayToken);
-            gatewayRequest.buildJsonRequest();
+            gatewayRequest.buildJsonRequest(ssoZone);
 
             Logger::styledDebug(r, "Sending JSon request to Gateway:" + gatewayRequest.getPayload().toStyledString());
             
