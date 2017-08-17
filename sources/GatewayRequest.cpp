@@ -3,7 +3,7 @@
 #include "StringBuilder.h"
 #include "StringProcessor.h"
 #include "Logger.h"
-
+#include <algorithm>
 #include <http_request.h>
 #include <http_core.h>
 namespace ssorest
@@ -69,7 +69,7 @@ namespace ssorest
         // Request Header
         auto headers = TypesConverter::toMap(sourceRequest->headers_in);
         
-        // TODO: locale
+        // locale
         Json::Value jsonLocales = Json::Value(Json::arrayValue);
         auto locales = StringProcessor::split(headers["Accept-Language"], ",");
         for (const auto& locale : locales)
@@ -140,19 +140,32 @@ namespace ssorest
         jsonData["cookies"] = jsonCookieArray;
 
         // parameter Array
-        // TODO: Handle Prarametername duplicate
         Json::Value jsonParametersArray = Json::Value(Json::objectValue);
         auto parameters = StringProcessor::split(TypesConverter::toStringSafety(sourceRequest->parsed_uri.query), "&");
-        for (const auto& parameter : parameters)
+        std::sort(parameters.begin(), parameters.end());
+        
+        // first element
+        auto firstParameter = StringProcessor::split(parameters[0], "=");
+        std::string previousParamName =  StringProcessor::trimmed(firstParameter[0]);
+        
+        Json::Value jsonParameter = Json::Value(Json::arrayValue);
+        for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); ++it)
         {
-            auto parameterKeyValue = StringProcessor::split(parameter, "=");
+            auto parameterKeyValue = StringProcessor::split((*it), "=");
             if (parameterKeyValue.size() == 2)
             {
-                Json::Value jsonParameter = Json::Value(Json::arrayValue);
-                std::string decodedStr;;
+                auto currentParamName = StringProcessor::trimmed(parameterKeyValue[0]);
+                std::string decodedStr;
                 StringProcessor::decode(StringProcessor::trimmed(parameterKeyValue[1]), decodedStr);
+                if(previousParamName != currentParamName)
+                {
+                    jsonParametersArray[previousParamName] = jsonParameter;
+                    jsonParameter = Json::Value(Json::arrayValue);
+                    previousParamName = currentParamName;
+                }
                 jsonParameter.append(decodedStr);
-                jsonParametersArray[StringProcessor::trimmed(parameterKeyValue[0])] = jsonParameter;
+                if(it == parameters.end() - 1)
+                    jsonParametersArray[previousParamName] = jsonParameter;
             }
         }
         jsonData["parameters"] = jsonParametersArray;
