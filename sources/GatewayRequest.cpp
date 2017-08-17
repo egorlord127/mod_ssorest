@@ -12,7 +12,6 @@ namespace ssorest
     : server(sourceRequest->server)
     , scheme(getScheme(sourceRequest))
     {
-        // TODO: 
         // method
         jsonData["method"] = TypesConverter::toStringSafety(sourceRequest->method);
         
@@ -67,10 +66,20 @@ namespace ssorest
         // servletPath
         jsonData["servletPath"] = std::string();
 
+        // Request Header
+        auto headers = TypesConverter::toMap(sourceRequest->headers_in);
+        
         // TODO: locale
+        Json::Value jsonLocales = Json::Value(Json::arrayValue);
+        auto locales = StringProcessor::split(headers["Accept-Language"], ",");
+        for (const auto& locale : locales)
+        {
+            auto localValue = StringProcessor::split(locale, ";");
+            jsonLocales.append(StringProcessor::trimmed(localValue[0]));
+        }
+        jsonData["locales"] = jsonLocales;
 
         // headers Array
-        auto headers = TypesConverter::toMap(sourceRequest->headers_in);
         Json::Value jsonHeaders;
 
         // accept-language
@@ -131,6 +140,7 @@ namespace ssorest
         jsonData["cookies"] = jsonCookieArray;
 
         // parameter Array
+        // TODO: Handle Prarametername duplicate
         Json::Value jsonParametersArray = Json::Value(Json::objectValue);
         auto parameters = StringProcessor::split(TypesConverter::toStringSafety(sourceRequest->parsed_uri.query), "&");
         for (const auto& parameter : parameters)
