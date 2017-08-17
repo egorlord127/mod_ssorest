@@ -4,7 +4,9 @@
 #include "Logger.h"
 #include "NetworkInfo.h"
 #include "StringProcessor.h"
-
+#include "Cryptography/Cryptor.h"
+#include "Base64.h"
+#include "RandomSequence.h"
 #include <http_log.h>
 #include <algorithm>
 #include <iostream>
@@ -21,7 +23,7 @@ namespace ssorest
     : isEnabled(false)
     , fqdn(NetworkInfo().getFQDN())
     {
-        
+        gatewayToken = std::string();        
     }
 
 
@@ -161,12 +163,49 @@ namespace ssorest
                 return (HTTP_FORBIDDEN);
             }
             GatewayRequest gatewayRequest(r);
-            gatewayRequest.setPluginId(pluginId);
-            gatewayRequest.setAcoName(acoName);
+            gatewayRequest.set(GatewayRequest::acoName, acoName);
+            gatewayRequest.set(GatewayRequest::pluginId, pluginId);
+            gatewayRequest.set(GatewayRequest::gatewayToken, gatewayToken);
+            gatewayRequest.buildJsonRequest();
 
+            Logger::styledDebug(r, "Sending JSon request to Gateway:" + gatewayRequest.getPayload().toStyledString());
+            
             GatewayResponse response(gatewayRequest.sendTo(gatewayUrl));
             auto jsonResponse = response.getJsonResponse();
-            Logger::styledDebug(r, jsonResponse.toStyledString());
+            Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());
+
+            auto status = response.getJsonResponseStatus();
+            if (status == HTTP_CONTINUE)
+            {
+                return (DECLINED);
+            }
+            else if (status == HTTP_NOT_EXTENDED)
+            {
+                auto responseBody = response.getResponseBody();
+                if (responseBody.find("Signature Needed") != std::string::npos)
+                {
+                    auto randomText = RandomSequence::generate(32);
+                    Logger::notice(r, "Generated randomText: %s", randomText.c_str());
+                    Cryptor::HMACSHA1Digest digest;
+                    Cryptor::computeHMACSHA1(randomText, secretKey, digest);
+                    auto signedRandomText = base64_encode(digest.data(), static_cast<unsigned int>(digest.size()));
+                    Logger::notice(r, "Generated HMAC: %s", signedRandomText.c_str());
+                    
+                    std::string encodedSignedRandomText;
+                    StringProcessor::encode(signedRandomText, encodedSignedRandomText);
+                    
+                    gatewayRequest.set(GatewayRequest::randomText, randomText);
+                    gatewayRequest.set(GatewayRequest::randomTextSigned, encodedSignedRandomText);
+                }
+                else
+                {
+                }
+                return process(r);
+            }
+            else
+            {
+                return status;
+            }
         }
         
 

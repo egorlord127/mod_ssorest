@@ -20,5 +20,9 @@ namespace ssorest
         const Json::Value& getJsonResponse() const;
         const Json::Value& getJsonSubRequest() const;
         const Json::Value& getJsonSubResponse() const;
+
+        int getJsonResponseStatus() const;
+        std::string getResponseBody() const;
+        
     };
 }

@@ -62,6 +62,10 @@ if not environment.GetOption('clean'):
         sys.exit(1)
     	
 sources = [ 'Base64.cpp',
+            'RandomSequence.cpp',
+            'Cryptography/Cryptor.cpp',
+            'Cryptography/HMAC_SHA1.cpp',
+            'Cryptography/SHA1.cpp',
             'CurlWrapper.cpp',
             'StringProcessor.cpp',
             'TypesConverter.cpp',

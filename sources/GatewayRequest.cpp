@@ -7,50 +7,76 @@
 #include <algorithm>
 #include <http_request.h>
 #include <http_core.h>
+#include <httpd.h>
 namespace ssorest
 {
+    const std::string GatewayRequest::acoName("acoName");
+    const std::string GatewayRequest::gatewayToken("gatewayToken");
+    const std::string GatewayRequest::pluginId("pluginID");
+    const std::string GatewayRequest::randomText("randomText");
+    const std::string GatewayRequest::randomTextSigned("randomTextSigned");
+    const std::string GatewayRequest::content("content");
+    const std::string GatewayRequest::contentTimestamp("contentTimestamp");
+
+    const std::vector<std::string> GatewayRequest::jsonAttributesKeys
+    ({
+        GatewayRequest::acoName, 
+        GatewayRequest::gatewayToken,
+        GatewayRequest::pluginId,
+        GatewayRequest::randomText,
+        GatewayRequest::randomTextSigned,
+        GatewayRequest::content,
+        GatewayRequest::contentTimestamp
+    });
+
+
     GatewayRequest::GatewayRequest(request_rec* sourceRequest)
-    : server(sourceRequest->server)
-    , scheme(getScheme(sourceRequest))
+    {
+        server = sourceRequest->server;
+        request = sourceRequest;
+        scheme = getScheme(request);
+    }
+    
+    void GatewayRequest::buildJsonRequest()
     {
         // method
-        jsonData["method"] = TypesConverter::toStringSafety(sourceRequest->method);
+        jsonData["method"] = TypesConverter::toStringSafety(request->method);
         
         // url
-        jsonData["url"] = scheme + "://" + TypesConverter::toStringSafety(sourceRequest->hostname) + TypesConverter::toStringSafety(sourceRequest->unparsed_uri);
+        jsonData["url"] = scheme + "://" + TypesConverter::toStringSafety(request->hostname) + TypesConverter::toStringSafety(request->unparsed_uri);
         
         // protocol
-        jsonData["protocol"] = TypesConverter::toStringSafety(sourceRequest->protocol);
+        jsonData["protocol"] = TypesConverter::toStringSafety(request->protocol);
         
         // characterEncoding
-        jsonData["characterEncoding"] = TypesConverter::toStringSafety(sourceRequest->content_encoding);
+        jsonData["characterEncoding"] = TypesConverter::toStringSafety(request->content_encoding);
 
         // contentLength
-        jsonData["contentLength"] = static_cast<Json::Value::UInt>(sourceRequest->clength);
+        jsonData["contentLength"] = static_cast<Json::Value::UInt>(request->clength);
 
         // contentType
-        jsonData["contentType"] = TypesConverter::toStringSafety(sourceRequest->content_type);
+        jsonData["contentType"] = TypesConverter::toStringSafety(request->content_type);
 
         // contextPath
-        jsonData["contextPath"] = TypesConverter::toStringSafety(ap_document_root(sourceRequest));
+        jsonData["contextPath"] = TypesConverter::toStringSafety(ap_document_root(request));
         
         // localAddr
-        jsonData["localAddr"] = TypesConverter::toStringSafety(sourceRequest->connection->local_ip);
+        jsonData["localAddr"] = TypesConverter::toStringSafety(request->connection->local_ip);
 
         // localName
-        jsonData["localName"] = TypesConverter::toStringSafety(sourceRequest->server->server_hostname);
+        jsonData["localName"] = TypesConverter::toStringSafety(request->server->server_hostname);
         
         // localPort
-        jsonData["localPort"] = static_cast<Json::Value::UInt>(getServerPort(sourceRequest));
+        jsonData["localPort"] = static_cast<Json::Value::UInt>(getServerPort(request));
         
         // remoteAddr
-        jsonData["remoteAddr"] = TypesConverter::toStringSafety(sourceRequest->useragent_ip);
+        jsonData["remoteAddr"] = TypesConverter::toStringSafety(request->useragent_ip);
         
         // remoteHost
-        jsonData["remoteHost"] = TypesConverter::toStringSafety(sourceRequest->useragent_ip);
+        jsonData["remoteHost"] = TypesConverter::toStringSafety(request->useragent_ip);
         
         // remotePort
-        jsonData["remotePort"] = static_cast<Json::Value::UInt>(sourceRequest->useragent_addr->port);
+        jsonData["remotePort"] = static_cast<Json::Value::UInt>(request->useragent_addr->port);
         
         // secure
         jsonData["secure"] = isSecureProtocol();
@@ -59,16 +85,16 @@ namespace ssorest
         jsonData["scheme"] = scheme;
 
         // serverName
-        jsonData["serverName"] = TypesConverter::toStringSafety(sourceRequest->server->server_hostname);
+        jsonData["serverName"] = TypesConverter::toStringSafety(request->server->server_hostname);
         
         // serverPort
-        jsonData["serverPort"] = static_cast<Json::Value::UInt>(getServerPort(sourceRequest));
+        jsonData["serverPort"] = static_cast<Json::Value::UInt>(getServerPort(request));
         
         // servletPath
         jsonData["servletPath"] = std::string();
 
         // Request Header
-        auto headers = TypesConverter::toMap(sourceRequest->headers_in);
+        auto headers = TypesConverter::toMap(request->headers_in);
         
         // locale
         Json::Value jsonLocales = Json::Value(Json::arrayValue);
@@ -142,7 +168,7 @@ namespace ssorest
 
         // parameter Array
         Json::Value jsonParametersArray = Json::Value(Json::objectValue);
-        auto parameters = StringProcessor::split(TypesConverter::toStringSafety(sourceRequest->parsed_uri.query), "&");
+        auto parameters = StringProcessor::split(TypesConverter::toStringSafety(request->parsed_uri.query), "&");
         std::sort(parameters.begin(), parameters.end());
         
         // first element
@@ -176,7 +202,9 @@ namespace ssorest
         jsonData["parameters"] = jsonParametersArray;
 
         // Attributes Array
-
+        auto attributes = enumerateAttributes();
+        for (auto& attribute : attributes)
+            jsonData["attributes"][attribute.first] = attribute.second;
     }
     std::string GatewayRequest::getScheme(const request_rec* request)
     {
@@ -253,5 +281,67 @@ namespace ssorest
     {
         if(!value.empty())
             jsonData["attributes"]["pluginID"] = value;
+    }
+    
+    void GatewayRequest::setRandomtext(const std::string& value)
+    {
+        if(!value.empty())
+            jsonData["attributes"]["randomText"] = value;
+    }
+    
+    void GatewayRequest::setRandomtextSigned(const std::string& value)
+    {
+        if(!value.empty())
+            jsonData["attributes"]["randomTextSigned"] = value;
+    }
+
+    void GatewayRequest::setGatewayToken(const std::string& value)
+    {
+        if(!value.empty())
+            jsonData["attributes"]["gatewayToken"] = value;
+    }
+
+    void GatewayRequest::set(const std::string& key, const std::string& value)
+    {
+        auto detachedValue = new std::string(value);
+        auto status = ::apr_pool_userdata_set(detachedValue, key.c_str(), cleanupAttributes, request->pool);
+        if (status != APR_SUCCESS)
+        {
+            // TODO: Error Handling here?
+        }
+    }
+
+    apr_status_t GatewayRequest::cleanupAttributes(void* attribute)
+    {
+        auto customAttribute = reinterpret_cast<std::string*>(attribute);
+        delete customAttribute;
+        return APR_SUCCESS;
+    }
+
+    std::string GatewayRequest::get(const std::string& key) const
+    {
+        std::string* valuePointer = nullptr;
+        auto status = ::apr_pool_userdata_get(reinterpret_cast<void**>(&valuePointer), key.c_str(), request->pool);
+        if (status != APR_SUCCESS)
+        {
+            // TODO: Error Handling here?
+        }
+        
+        std::string value;
+        if (valuePointer)
+            value.assign(*valuePointer);
+        return value;
+    }
+
+    std::map<std::string, std::string> GatewayRequest::enumerateAttributes() const
+    {
+        std::map<std::string, std::string> result;
+        for (auto& attributeKey : jsonAttributesKeys)
+        {
+            auto value = get(attributeKey);
+            if (!value.empty())
+                result[attributeKey] = value;
+        }
+        return result;
     }
 }

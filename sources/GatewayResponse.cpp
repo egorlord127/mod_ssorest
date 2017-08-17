@@ -29,4 +29,38 @@ namespace ssorest
     {
         return subresponse;
     }
+    
+    int GatewayResponse::getJsonResponseStatus() const
+    {
+        auto jsonValue = subresponse["status"];
+        if (jsonValue.isNull())
+        {
+            // TODO: Error Handling
+        }
+        try
+        {
+            return jsonValue.asInt();
+        }
+        catch (...)
+        {
+            // TODO: Error Handling
+        }
+    }
+        
+    std::string GatewayResponse::getResponseBody() const
+    {
+        auto jsonValue = subresponse["body"];
+        if (jsonValue.isNull())
+        {
+            // TODO: Error Handling
+        }
+        try
+        {
+            return jsonValue.asString();
+        }
+        catch (...)
+        {
+            // TODO: Error Handling
+        }
+    }
 }
