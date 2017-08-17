@@ -164,7 +164,7 @@ namespace ssorest
             gatewayRequest.setAcoName(acoName);
 
             auto response = gatewayRequest.sendTo(gatewayUrl);
-            Logger::emerg(r, "%s", response.c_str());
+            Logger::styledDebug(r, response);
         }
         
 

@@ -2,7 +2,6 @@
 #include "TypesConverter.h"
 #include "StringBuilder.h"
 #include "StringProcessor.h"
-#include "Logger.h"
 #include "CurlWrapper.h"
 #include "CurlList.h"
 #include <algorithm>
@@ -240,7 +239,6 @@ namespace ssorest
         
         CurlWrapper::verifyResult(::curl_easy_perform(curl));
         std::string response(rawResponse.data(), rawResponse.size());       
-        Logger::emerg(server, "Json:%d", rawResponse.size());
         return response;
     }
 
