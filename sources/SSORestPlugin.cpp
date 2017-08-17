@@ -117,11 +117,6 @@ namespace ssorest
         ignoreUrl.push_back(value);
     }  
 
-    void SSORestPlugin::setExtendedDumpFile(const std::string& value)
-    {
-        extentededDumpFileName = value;
-    }
-
     int SSORestPlugin::process(request_rec* r)
     {
         sourceRequest = r;
@@ -171,18 +166,4 @@ namespace ssorest
         return OK;
     }
 
-    void SSORestPlugin::appendToExtendedDump(const std::string& information) const
-    {
-        if (!extentededDumpFileName.empty())
-        {
-            std::ofstream dumpFile(extentededDumpFileName, std::ofstream::out | std::ofstream::app);
-            if (dumpFile.is_open())
-            {
-                dumpFile << information << std::endl;
-                dumpFile.close();
-            } else {
-                Logger::notice(sourceRequest, "File do not exist, or have no permission to open");
-            }
-        }
-    }
 }

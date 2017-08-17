@@ -19,7 +19,6 @@ namespace ssorest
         std::string gatewayToken;
         std::string pluginId;
         std::string secretKey;
-        std::string extentededDumpFileName;
         std::vector<std::string> ssoZone;
         std::vector<std::string> ignoreExt;
         std::vector<std::string> ignoreUrl;
@@ -50,13 +49,10 @@ namespace ssorest
         void setGatewayToken(const std::string& value);
         void setPluginId(const std::string& value);
         void setSecretKey(const std::string& value);
-        void setExtendedDumpFile(const std::string& value);
         void addSSOZone(const std::string& value);
         void addIgnoreExt(const std::string& value);
         void addIgnoreUrl(const std::string& value);
 
         int process(request_rec* incomingRequest);
-
-        void appendToExtendedDump(const std::string& information) const;
     };
 }

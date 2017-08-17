@@ -18,8 +18,6 @@ static const char* setSecretKey(cmd_parms* command, void* /*config*/, const char
 static const char* setSSOZone(cmd_parms* command, void* /*config*/, const char* argument);
 static const char* setIgnoreExt(cmd_parms* command, void* /*config*/, const char* argument);
 static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char* argument);
-static const char* setExtendedDumpFile(cmd_parms* command, void* /*config*/, const char* argument);
-
 static void registerHooks(apr_pool_t* );
 
 
@@ -106,14 +104,6 @@ static const command_rec moduleDirectives[] =
         ""
     ),
 
-    AP_INIT_TAKE1
-    (
-        "SSORestExtendedDumpFile",
-        reinterpret_cast<cmd_func>(setExtendedDumpFile), 
-        NULL, 
-        OR_ALL, 
-        "Enable or disable libcurl debug"
-    ),    
     { NULL }
 };
 
@@ -211,13 +201,6 @@ static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char
     if(*argument != '/')
         return "SSORestIgnoreUrl directive should be start with '/'";
     ssorestplugin->addIgnoreUrl(argument);
-    return NULL;
-}
-
-static const char* setExtendedDumpFile(cmd_parms* command, void* /*config*/, const char* argument)
-{
-    auto ssorestplugin = getSSORestPluginFrom(command->server);
-    ssorestplugin->setExtendedDumpFile(argument);
     return NULL;
 }
 
