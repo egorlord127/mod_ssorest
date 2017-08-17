@@ -154,12 +154,17 @@ namespace ssorest
                 }
             }
 
-            GatewayRequest gatewayRequest(r, fqdn);
-            auto jsonRequestArray = StringProcessor::split(gatewayRequest.getPayload().toStyledString(), "\n");
-            for(std::vector<string>::iterator it = jsonRequestArray.begin(); it != jsonRequestArray.end(); ++it)
+            if(gatewayUrl.empty())
             {
-                Logger::notice(r, "%s", (*it).c_str());
+                Logger::notice(r, "No SSORestGatewayUrl in configuration");
+                return (HTTP_FORBIDDEN);
             }
+            GatewayRequest gatewayRequest(r);
+            gatewayRequest.setPluginId(pluginId);
+            gatewayRequest.setAcoName(acoName);
+
+            auto response = gatewayRequest.sendTo(gatewayUrl);
+            Logger::emerg(r, "%s", response.c_str());
         }
         
 

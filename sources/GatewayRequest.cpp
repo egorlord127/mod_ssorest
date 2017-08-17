@@ -3,12 +3,14 @@
 #include "StringBuilder.h"
 #include "StringProcessor.h"
 #include "Logger.h"
+#include "CurlWrapper.h"
+#include "CurlList.h"
 #include <algorithm>
 #include <http_request.h>
 #include <http_core.h>
 namespace ssorest
 {
-    GatewayRequest::GatewayRequest(request_rec* sourceRequest, const std::string& fqdn)
+    GatewayRequest::GatewayRequest(request_rec* sourceRequest)
     : server(sourceRequest->server)
     , scheme(getScheme(sourceRequest))
     {
@@ -170,6 +172,11 @@ namespace ssorest
         }
         jsonData["parameters"] = jsonParametersArray;
 
+        // Attributes Array
+        Json::Value jsonAttributes;
+        jsonAttributes["pluginID"] = 
+        jsonAttributes["acoName"] = 
+        jsonData["attributes"] = jsonAttributes;
     }
     std::string GatewayRequest::getScheme(const request_rec* request)
     {
@@ -206,5 +213,46 @@ namespace ssorest
     const Json::Value& GatewayRequest::getPayload() const
     {
         return jsonData;
+    }
+
+    std::string GatewayRequest::sendTo(const std::string& gatewayUrl) const
+    {
+        CurlWrapper curl;
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_URL, gatewayUrl.c_str()));
+        CurlList headers;
+        headers.append("Accept: application/json");
+        headers.append("Content-Type: application/json");
+        headers.append("Charsets: utf-8");
+        headers.append("User-Agent: mod_idfc/0.0");
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers.data()));
+    
+        auto postData = jsonData.toStyledString();
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "POST"));
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str()));
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postData.size()));
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE));
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30));
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1));
+    
+        CurlWrapper::WriteBuffer rawResponse;
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrapper::writeCallback));
+        CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &rawResponse));
+        
+        CurlWrapper::verifyResult(::curl_easy_perform(curl));
+        std::string response(rawResponse.data(), rawResponse.size());       
+        Logger::emerg(server, "Json:%d", rawResponse.size());
+        return response;
+    }
+
+    void GatewayRequest::setAcoName(const std::string& value)
+    {
+        if(!value.empty())
+            jsonData["attributes"]["acoName"] = value;
+    }
+
+    void GatewayRequest::setPluginId(const std::string& value)
+    {
+        if(!value.empty())
+            jsonData["attributes"]["pluginID"] = value;
     }
 }

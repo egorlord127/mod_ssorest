@@ -11,17 +11,17 @@ namespace ssorest
         const server_rec* server;
         std::string scheme;
         Json::Value jsonData;
-
     public:
-        GatewayRequest(request_rec* sourceRequest, const std::string& fqdn);
+        GatewayRequest(request_rec* sourceRequest);
         const Json::Value& getPayload() const;
         std::string sendTo(const std::string& gatewayUrl) const;
-    
+        void setAcoName(const std::string& value);
+        void setPluginId(const std::string& value);
     private:
         static std::string getScheme(const request_rec* request);
         static int getServerPort(const request_rec* request);
         void verifyThatSourceRequestIsDefined() const;
         bool isSecureProtocol() const;
-        // static std::vector<Cookie> extractCookiesFrom(CurlWrapper& curl);
+        
     };
 }
