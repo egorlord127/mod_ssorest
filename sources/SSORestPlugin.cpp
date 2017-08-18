@@ -178,6 +178,12 @@ namespace ssorest
             auto status = response.getJsonResponseStatus();
             if (status == HTTP_CONTINUE)
             {
+                RequestHeaderWrapper requestHeaderWrapper(r);
+                requestHeaderWrapper.propagateResponseHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::In);
+                
+                auto additionalCookies = response.getResponseCookies();
+                requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
+
                 return (DECLINED);
             }
             else if (status == HTTP_NOT_EXTENDED)
