@@ -179,6 +179,10 @@ namespace ssorest
             Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());
             Logger::emerg(r, "Gateway provided response status = %d", status);
 
+            auto gatewayTokenIterator = responseHeaders.find("gatewayToken");
+            if (gatewayTokenIterator != responseHeaders.cend())
+                gatewayToken = gatewayTokenIterator->second;
+
             if (status == HTTP_CONTINUE)
             {
                 RequestHeaderWrapper requestHeaderWrapper(r);
