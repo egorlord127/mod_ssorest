@@ -208,6 +208,7 @@ static int processRequest(request_rec* r) {
     int httpResult = OK;
     auto ssorestplugin = getSSORestPluginFrom(r->server);
     httpResult = ssorestplugin->process(r);
+    Logger::emerg(r, "Request to Gateway had result code: %d", httpResult);
     return httpResult;
 }
 

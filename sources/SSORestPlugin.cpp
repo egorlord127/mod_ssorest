@@ -131,7 +131,6 @@ namespace ssorest
         
         Logger::notice(r, "Processing new request");
 
-        
         if (r->uri)
         {
             /* 1.Check if the request uri matches with ignored extension */
@@ -162,6 +161,8 @@ namespace ssorest
                 Logger::notice(r, "No SSORestGatewayUrl in configuration");
                 return (HTTP_FORBIDDEN);
             }
+
+
             GatewayRequest gatewayRequest(r);
             gatewayRequest.set(GatewayRequest::acoName, acoName);
             gatewayRequest.set(GatewayRequest::pluginId, pluginId);
@@ -173,9 +174,11 @@ namespace ssorest
             GatewayResponse response(gatewayRequest.sendTo(gatewayUrl, traceEnabled));
             auto jsonResponse = response.getJsonResponse();
             auto responseHeaders = response.getResponseHeader();
-            Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());
-
             auto status = response.getJsonResponseStatus();
+
+            Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());
+            Logger::emerg(r, "Gateway provided response status = %d", status);
+
             if (status == HTTP_CONTINUE)
             {
                 RequestHeaderWrapper requestHeaderWrapper(r);
@@ -184,7 +187,7 @@ namespace ssorest
                 auto additionalCookies = response.getResponseCookies();
                 requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
 
-                return (DECLINED);
+                return (OK);
             }
             else if (status == HTTP_NOT_EXTENDED)
             {
@@ -206,6 +209,7 @@ namespace ssorest
                 }
                 else
                 {
+                    // TODO: LocalSendFile Handling here?
                 }
                 return process(r);
             }
@@ -225,8 +229,6 @@ namespace ssorest
                 return status;
             }
         }
-        
-
         return OK;
     }
 
