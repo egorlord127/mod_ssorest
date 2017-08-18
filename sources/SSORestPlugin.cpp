@@ -1,6 +1,7 @@
 #include "SSORestPlugin.h"
 #include "GatewayRequest.h"
 #include "GatewayResponse.h"
+#include "RequestHeaderWrapper.h"
 #include "Logger.h"
 #include "StringProcessor.h"
 #include "Cryptography/Cryptor.h"
@@ -171,6 +172,7 @@ namespace ssorest
             
             GatewayResponse response(gatewayRequest.sendTo(gatewayUrl));
             auto jsonResponse = response.getJsonResponse();
+            auto responseHeaders = response.getResponseHeader();
             Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());
 
             auto status = response.getJsonResponseStatus();
@@ -203,6 +205,17 @@ namespace ssorest
             }
             else
             {
+                RequestHeaderWrapper requestHeaderWrapper(r);
+                requestHeaderWrapper.propagateResponseHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::Out);
+                
+                auto additionalCookies = response.getResponseCookies();
+                requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
+                
+                // if (gatewayResponse.isSubresponseBodySet())
+                // {
+                //     auto moduleResponse = base64_decode(gatewayResponse.getSubresponseBody());
+                //     ap_rwrite(moduleResponse.c_str(), static_cast<int>(moduleResponse.size()), incomingRequest);
+                // }
                 return status;
             }
         }

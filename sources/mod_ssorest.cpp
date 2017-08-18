@@ -205,9 +205,10 @@ static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char
 }
 
 static int processRequest(request_rec* r) {
+    int httpResult = OK;
     auto ssorestplugin = getSSORestPluginFrom(r->server);
-    ssorestplugin->process(r);
-    return OK;
+    httpResult = ssorestplugin->process(r);
+    return httpResult;
 }
 
 static void registerHooks(apr_pool_t* ) {

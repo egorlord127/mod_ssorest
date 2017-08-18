@@ -24,5 +24,7 @@ namespace ssorest
         int getJsonResponseStatus() const;
         std::string getResponseBody() const;
         
+        std::map<std::string, std::string> getResponseHeader() const;
+        std::map<std::string, std::string> getResponseCookies() const;
     };
 }
