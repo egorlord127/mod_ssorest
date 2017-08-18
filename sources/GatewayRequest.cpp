@@ -260,7 +260,7 @@ namespace ssorest
         return jsonData;
     }
 
-    std::string GatewayRequest::sendTo(const std::string& gatewayUrl) const
+    std::string GatewayRequest::sendTo(const std::string& gatewayUrl, bool isTraceEnabled) const
     {
         CurlWrapper curl;
         CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_URL, gatewayUrl.c_str()));
@@ -279,6 +279,13 @@ namespace ssorest
         CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30));
         CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1));
     
+        if (isTraceEnabled)
+        {
+            CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, CurlWrapper::traceCurl));
+            CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, request));
+            CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1));
+        }
+
         CurlWrapper::WriteBuffer rawResponse;
         CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrapper::writeCallback));
         CurlWrapper::verifyResult(::curl_easy_setopt(curl, CURLOPT_WRITEDATA, &rawResponse));

@@ -170,7 +170,7 @@ namespace ssorest
 
             Logger::styledDebug(r, "Sending JSon request to Gateway:" + gatewayRequest.getPayload().toStyledString());
             
-            GatewayResponse response(gatewayRequest.sendTo(gatewayUrl));
+            GatewayResponse response(gatewayRequest.sendTo(gatewayUrl, traceEnabled));
             auto jsonResponse = response.getJsonResponse();
             auto responseHeaders = response.getResponseHeader();
             Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());

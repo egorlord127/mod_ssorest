@@ -28,6 +28,7 @@ namespace ssorest
     public:
         static void verifyResult(CURLcode curlCode);
         static size_t writeCallback(void* newData, size_t elementsQuantity, size_t elementSize, WriteBuffer* outputBuffer);
+        static int traceCurl(CURL *handle, curl_infotype type, void* data, size_t size, void *userp);
         std::string getUrlEncodedVersionOf(const std::string& plainText);
     };
 }
