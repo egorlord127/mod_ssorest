@@ -1,5 +1,5 @@
 #include "RequestHeaderWrapper.h"
-
+#include "Logger.h"
 namespace ssorest
 {
     RequestHeaderWrapper::RequestHeaderWrapper(request_rec* r)
@@ -15,6 +15,7 @@ namespace ssorest
         {
             auto& name = sourceHeader.first;
             auto& value = sourceHeader.second;
+            Logger::emerg(request, "Propagating request header: %s=%s", name.c_str(), value.c_str());
             ::apr_table_set(destinationHeader, name.c_str(), value.c_str());
         }
     }
@@ -32,6 +33,8 @@ namespace ssorest
             if (!mergedCookies.empty())
                 mergedCookies += "; ";
             mergedCookies += sourceCookie.first + "=" + sourceCookie.second;
+
+            // TODO: Add Additional Cookie Attributes (hint: only in case of response)
         }
         ::apr_table_set(destinationHeader, "Cookie", mergedCookies.c_str());
     }

@@ -186,8 +186,13 @@ namespace ssorest
             if (status == HTTP_CONTINUE)
             {
                 RequestHeaderWrapper requestHeaderWrapper(r);
+                
+                // Transfer REQUEST headers (hint: not responses!)
                 requestHeaderWrapper.propagateResponseHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::In);
                 
+                // TODO: Transfer new request cookies too! And only the name=value pairs (not the addl cookie attributes)
+
+                //Transfer any new cookies to the response
                 auto additionalCookies = response.getResponseCookies();
                 requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
 
@@ -198,6 +203,7 @@ namespace ssorest
                 auto responseBody = response.getResponseBody();
                 if (responseBody.find("Signature Needed") != std::string::npos)
                 {
+                    // Generate RandomText and RandomTextSigned String
                     auto randomText = RandomSequence::generate(32);
                     Logger::notice(r, "Generated randomText: %s", randomText.c_str());
                     Cryptor::HMACSHA1Digest digest;
@@ -208,6 +214,7 @@ namespace ssorest
                     std::string encodedSignedRandomText;
                     URI::encode(signedRandomText, encodedSignedRandomText);
                     
+                    // Add Value to current json
                     gatewayRequest.set(GatewayRequest::randomText, randomText);
                     gatewayRequest.set(GatewayRequest::randomTextSigned, encodedSignedRandomText);
                 }
