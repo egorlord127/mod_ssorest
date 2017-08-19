@@ -19,7 +19,7 @@ if not environment.GetOption('clean'):
         try :
             svnversion = int(svnversion)
         except:
-            svnversion = "SVN Unversioned directory"
+            svnversion = ""
         
         Export('svnversion')
 

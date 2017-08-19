@@ -278,6 +278,7 @@ static int pluginInitialize(apr_pool_t *p, apr_pool_t *plog, apr_pool_t *ptemp, 
 #if defined(SVN_REV) && defined(MOD_VER)
     ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s, "SSO/Rest Plugin for NGINX v%s build %s", MOD_VER, SVN_REV);
 #endif
+    return OK;
 }
 
 static void registerHooks(apr_pool_t* ) {
