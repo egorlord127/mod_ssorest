@@ -9,6 +9,9 @@
 #include "RandomSequence.h"
 #include "URI.h"
 #include <http_log.h>
+#include <http_core.h>
+#include <http_protocol.h>
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -232,11 +235,11 @@ namespace ssorest
                 auto additionalCookies = response.getResponseCookies();
                 requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
                 
-                // if (gatewayResponse.isSubresponseBodySet())
-                // {
-                //     auto moduleResponse = base64_decode(gatewayResponse.getSubresponseBody());
-                //     ap_rwrite(moduleResponse.c_str(), static_cast<int>(moduleResponse.size()), incomingRequest);
-                // }
+                if(response.isResponseBodySet())
+                {
+                    auto moduleResponse = base64_decode(response.getResponseBody());
+                    ap_rwrite(moduleResponse.c_str(), static_cast<int>(moduleResponse.size()), r);
+                }
                 return status;
             }
         }

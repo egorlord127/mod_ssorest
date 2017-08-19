@@ -64,6 +64,12 @@ namespace ssorest
         }
     }
 
+    bool GatewayResponse::isResponseBodySet() const
+    {
+        auto jsonValue = subresponse["body"];
+        return !jsonValue.isNull();
+    }
+
     std::map<std::string, std::string> GatewayResponse::getResponseHeader() const
     {
         std::map<std::string, std::string> responseHeader;
