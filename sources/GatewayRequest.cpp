@@ -33,9 +33,8 @@ namespace ssorest
 
 
     GatewayRequest::GatewayRequest(request_rec* sourceRequest)
+    : request(sourceRequest)
     {
-        server = sourceRequest->server;
-        request = sourceRequest;
         scheme = getScheme(request);
     }
     
@@ -116,14 +115,8 @@ namespace ssorest
         jsonHeaderAcceptLanguage.append(headers["Accept-Language"]);
         jsonHeaders["accept-language"] = jsonHeaderAcceptLanguage;
         
-        // Cookie
-        // Json::Value jsonHeaderCookie = Json::Value(Json::arrayValue);
-        // auto cookies = StringProcessor::split(headers["Cookie"], "; ");
-        // for (std::vector<std::string>::iterator it = cookies.begin(); it != cookies.end(); ++it)
-        // {
-        //     jsonHeaderCookie.append((*it));
-        // }
-        // jsonHeaders["COOKIE"] = jsonHeaderCookie;
+        // COOKIE
+        // We skip this because cookies are a separate structure
 
         // connection
         Json::Value jsonHeaderConnection = Json::Value(Json::arrayValue);
@@ -150,6 +143,8 @@ namespace ssorest
         jsonHeaderUserAgent.append(headers["User-Agent"]);
         jsonHeaders["user-agent"] = jsonHeaderUserAgent;
 
+        // TODO: Authoriazation Header
+        
         jsonData["headers"] = jsonHeaders;
 
         // cookies Array

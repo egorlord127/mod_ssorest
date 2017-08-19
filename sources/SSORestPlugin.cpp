@@ -126,7 +126,7 @@ namespace ssorest
                 return (HTTP_FORBIDDEN);
             }
 
-
+            /* 3. Make A call to SSO Gateway */
             GatewayRequest gatewayRequest(r);
             gatewayRequest.set(GatewayRequest::acoName, acoName);
             gatewayRequest.set(GatewayRequest::pluginId, pluginId);

@@ -8,7 +8,6 @@ namespace ssorest
     class GatewayRequest
     {
     private:
-        server_rec* server;
         request_rec* request;
         std::string scheme;
         Json::Value jsonData;
