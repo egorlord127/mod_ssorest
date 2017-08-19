@@ -29,57 +29,6 @@ namespace ssorest
         gatewayToken = std::string();        
     }
 
-
-    bool SSORestPlugin::getEnable()
-    {
-        return isEnabled;
-    }
-
-    bool SSORestPlugin::getTraceEnable()
-    {
-        return traceEnabled;
-    }
-
-    string SSORestPlugin::getAccountName()
-    {
-        return acoName;
-    }
-
-    string SSORestPlugin::getGatewayUrl()
-    {
-        return gatewayUrl;
-    }
-
-    string SSORestPlugin::getGatewayToken()
-    {
-        return gatewayToken;
-    }
-
-    string SSORestPlugin::getPluginId()
-    {
-        return pluginId;
-    }
-
-    string SSORestPlugin::getSecretKey()
-    {
-        return secretKey;
-    }
-
-    vector<std::string> SSORestPlugin::getSSOZone()
-    {
-        return ssoZone;
-    }
-
-    vector<string> SSORestPlugin::getIgnoreExt()
-    {
-        return ignoreExt;
-    }
-
-    vector<string> SSORestPlugin::getIgnoreUrl()
-    {
-        return ignoreUrl;
-    }
-
     void SSORestPlugin::setEnable(const bool& flag)
     {
         isEnabled = flag;
@@ -88,6 +37,14 @@ namespace ssorest
     {
         traceEnabled = flag;
     }
+    void SSORestPlugin::setUseServerNameAsDefault(const bool& flag)
+    {
+        useServerNameAsDefault = flag;
+    }
+    void SSORestPlugin::setSendFormParameters(const bool& flag)
+    {
+        sendFormParameters = flag;
+    }
     void SSORestPlugin::setAccountName(const string& value)
     {
         acoName = value;
@@ -95,6 +52,10 @@ namespace ssorest
     void SSORestPlugin::setGatewayUrl(const string& value)
     {
         gatewayUrl = value;
+    }
+    void SSORestPlugin::setLocalRootPath(const std::string& value)
+    {
+        localrootpath = value;
     }
     void SSORestPlugin::setGatewayToken(const string& value)
     {
