@@ -12,8 +12,18 @@ if not environment.GetOption('clean'):
 
     platform = sys.platform
     if platform == "linux2":
+        svnversion = os.popen('svnversion -n .', 'r')
+        svnversion = svnversion.readline().strip()
+        svnversion = svnversion[svnversion.rfind(':') + 1:]
+        svnversion.replace('M', '')
+        try :
+            svnversion = int(svnversion)
+        except:
+            svnversion = "SVN Unversioned directory"
+        
+        Export('svnversion')
 
-        flags = '-O2 --std=gnu++11 -Wall -rdynamic -fpermissive -fPIC'
+        flags = '-O2 --std=gnu++11 -Wall -rdynamic -fpermissive -fPIC -D\'MOD_VER=\"0.8.7\"\' -D\'SVN_REV=\"%s\"\'' %svnversion
         includePaths = ["/usr/include/apache2", "/usr/include/httpd", "/usr/include/apr-1.0", "/usr/include/apr-1"]
         libraries = ['pthread', 'jsoncpp', 'curl']
         environment = Environment(LIBS=libraries, CPPFLAGS=flags, CPPPATH=includePaths) 
