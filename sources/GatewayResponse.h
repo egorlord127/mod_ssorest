@@ -26,6 +26,7 @@ namespace ssorest
         bool isResponseBodySet() const;
 
         std::map<std::string, std::string> getResponseHeader() const;
+        std::map<std::string, std::string> getRequestHeader() const;
         std::map<std::string, std::string> getResponseCookies() const;
     };
 }

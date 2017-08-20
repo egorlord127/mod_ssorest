@@ -33,35 +33,39 @@ namespace ssorest
     int GatewayResponse::getJsonResponseStatus() const
     {
         auto jsonValue = subresponse["status"];
+        int rv = 0;
         if (jsonValue.isNull())
         {
             // TODO: Error Handling
         }
         try
         {
-            return jsonValue.asInt();
+            rv = jsonValue.asInt();
         }
         catch (...)
         {
             // TODO: Error Handling
         }
+        return rv;
     }
         
     std::string GatewayResponse::getResponseBody() const
     {
         auto jsonValue = subresponse["body"];
+        std::string rv = std::string();
         if (jsonValue.isNull())
         {
             // TODO: Error Handling
         }
         try
         {
-            return jsonValue.asString();
+            rv = jsonValue.asString();
         }
         catch (...)
         {
             // TODO: Error Handling
         }
+        return rv;
     }
 
     bool GatewayResponse::isResponseBodySet() const
@@ -91,7 +95,29 @@ namespace ssorest
         }
         return responseHeader;
     }
-        
+
+    std::map<std::string, std::string> GatewayResponse::getRequestHeader() const
+    {
+        std::map<std::string, std::string> requestHeader;
+        try {
+            auto jsonHeaders = subrequest["headers"];
+            if (!jsonHeaders.isNull())
+            {
+                for (auto i = jsonHeaders.begin(); i != jsonHeaders.end(); ++i)
+                {
+                    auto name = i.key().asString();
+                    auto value = (*i)[static_cast<Json::Value::ArrayIndex>(0)].asString();
+                    requestHeader[name] = value;
+                }
+            }
+        }
+        catch (...)
+        {
+            // TODO: Error Handling
+        }
+        return requestHeader;
+    }
+    
     std::map<std::string, std::string> GatewayResponse::getResponseCookies() const
     {
         std::map<std::string, std::string> cookies;

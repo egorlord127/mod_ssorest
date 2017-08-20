@@ -152,17 +152,20 @@ namespace ssorest
 
             if (status == HTTP_CONTINUE)
             {
+                Logger::notice(r, "Entering handleAllowContinue");
+                
                 RequestHeaderWrapper requestHeaderWrapper(r);
                 
                 // Transfer REQUEST headers (hint: not responses!)
-                requestHeaderWrapper.propagateResponseHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::In);
+                auto requestHeaders = response.getRequestHeader();
+                requestHeaderWrapper.propagateResponseHeader(requestHeaders, RequestHeaderWrapper::TargetHeader::In);
                 
                 // TODO: Transfer new request cookies too! And only the name=value pairs (not the addl cookie attributes)
 
                 //Transfer any new cookies to the response
                 auto additionalCookies = response.getResponseCookies();
                 requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
-
+                Logger::notice(r, "Exiting handleAllowContinue");
                 return (OK);
             }
             else if (status == HTTP_NOT_EXTENDED)
