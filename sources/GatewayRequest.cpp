@@ -1,6 +1,5 @@
 #include "GatewayRequest.h"
 #include "TypesConverter.h"
-#include "StringBuilder.h"
 #include "StringProcessor.h"
 #include "CurlWrapper.h"
 #include "CurlList.h"
