@@ -3,6 +3,7 @@
 #include "GatewayResponse.h"
 #include "RequestHeaderWrapper.h"
 #include "Logger.h"
+#include "File.h"
 #include "StringProcessor.h"
 #include "Cryptography/Cryptor.h"
 #include "Base64.h"
