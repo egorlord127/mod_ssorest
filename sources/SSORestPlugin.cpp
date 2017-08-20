@@ -25,6 +25,9 @@ namespace ssorest
 {    
     SSORestPlugin::SSORestPlugin()
     : isEnabled(false)
+    , traceEnabled(false)
+    , useServerNameAsDefault(false)
+    , sendFormParameters(false)
     {
         gatewayToken = std::string();        
     }

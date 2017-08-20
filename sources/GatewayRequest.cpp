@@ -143,7 +143,7 @@ namespace ssorest
         jsonHeaderUserAgent.append(headers["User-Agent"]);
         jsonHeaders["user-agent"] = jsonHeaderUserAgent;
 
-        // TODO: Authoriazation Header
+        // TODO: Authorization Header
         
         jsonData["headers"] = jsonHeaders;
 
