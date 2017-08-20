@@ -14,7 +14,7 @@ namespace ssorest
 
     public:
         GatewayRequest(request_rec* sourceRequest);
-        void buildJsonRequest(const std::vector<std::string>& ssoZone);
+        void buildJsonRequest(const std::vector<std::string>& ssoZone, const bool& sendFormParameters);
         const Json::Value& getPayload() const;
         std::string sendTo(const std::string& gatewayUrl, bool isTraceEnabled) const;
 

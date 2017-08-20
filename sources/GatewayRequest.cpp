@@ -38,7 +38,7 @@ namespace ssorest
         scheme = getScheme(request);
     }
     
-    void GatewayRequest::buildJsonRequest(const std::vector<std::string>& ssoZone)
+    void GatewayRequest::buildJsonRequest(const std::vector<std::string>& ssoZone, const bool& sendFormParameters)
     {
         // method
         jsonData["method"] = TypesConverter::toStringSafety(request->method);
@@ -157,61 +157,74 @@ namespace ssorest
             {
                 Json::Value jsonCookie;
                 std::string cookieName = StringProcessor::trimmed(cookieKeyValue[0]);
-                bool flag = true;
-                for (const auto& zone : ssoZone)
+                if (!ssoZone.empty())
                 {
-                    if ( cookieName.find(zone) != std::string::npos)
+                    bool flag = true;
+                    for (const auto& zone : ssoZone)
                     {
-                        std::string cookieValue = StringProcessor::trimmed(cookieKeyValue[1]);
-                        Logger::emerg(request, "Transferring request cookie to JSon payload: %s=%s", cookieName.c_str(), cookieValue.c_str());
-                        jsonCookie["name"] = cookieName;
-                        jsonCookie["value"] = cookieValue;
-                        jsonCookieArray.append(jsonCookie);
-                        flag = false;
-                        break;
+                        if ( cookieName.find(zone) != std::string::npos)
+                        {
+                            std::string cookieValue = StringProcessor::trimmed(cookieKeyValue[1]);
+                            Logger::emerg(request, "Transferring request cookie to JSon payload: %s=%s", cookieName.c_str(), cookieValue.c_str());
+                            jsonCookie["name"] = cookieName;
+                            jsonCookie["value"] = cookieValue;
+                            jsonCookieArray.append(jsonCookie);
+                            flag = false;
+                            break;
+                        }
                     }
-                }
 
-                if(flag)
-                    Logger::emerg(request, "Skipping request cookie outside of our zone: %s", cookieName.c_str());
+                    if(flag)
+                        Logger::emerg(request, "Skipping request cookie outside of our zone: %s", cookieName.c_str());
+                } 
+                else 
+                {
+                    std::string cookieValue = StringProcessor::trimmed(cookieKeyValue[1]);
+                    Logger::emerg(request, "Transferring request cookie to JSon payload: %s=%s", cookieName.c_str(), cookieValue.c_str());
+                    jsonCookie["name"] = cookieName;
+                    jsonCookie["value"] = cookieValue;
+                    jsonCookieArray.append(jsonCookie);
+                }
             }
         }
         jsonData["cookies"] = jsonCookieArray;
 
         // parameter Array
-        Json::Value jsonParametersArray = Json::Value(Json::objectValue);
-        auto parameters = StringProcessor::split(TypesConverter::toStringSafety(request->parsed_uri.query), "&");
-        std::sort(parameters.begin(), parameters.end());
-        
-        // first element
-        std::vector<std::string> firstParameter;
-        std::string previousParamName;
-        if (parameters.size() > 0)
+        if (sendFormParameters)
         {
-            firstParameter = StringProcessor::split(parameters[0], "=");
-            previousParamName =  StringProcessor::trimmed(firstParameter[0]);
-        }
-        Json::Value jsonParameter = Json::Value(Json::arrayValue);
-        for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); ++it)
-        {
-            auto parameterKeyValue = StringProcessor::split((*it), "=");
-            if (parameterKeyValue.size() == 2)
+            Json::Value jsonParametersArray = Json::Value(Json::objectValue);
+            auto parameters = StringProcessor::split(TypesConverter::toStringSafety(request->parsed_uri.query), "&");
+            std::sort(parameters.begin(), parameters.end());
+            
+            std::vector<std::string> firstParameter;
+            std::string previousParamName;
+            if (parameters.size() > 0)
             {
-                auto currentParamName = StringProcessor::trimmed(parameterKeyValue[0]);
-                std::string decodedStr;
-                URI::decode(StringProcessor::trimmed(parameterKeyValue[1]), decodedStr);
-                if(previousParamName != currentParamName)
-                {
-                    jsonParametersArray[previousParamName] = jsonParameter;
-                    jsonParameter = Json::Value(Json::arrayValue);
-                    previousParamName = currentParamName;
-                }
-                jsonParameter.append(decodedStr);
-                if(it == parameters.end() - 1)
-                    jsonParametersArray[previousParamName] = jsonParameter;
+                firstParameter = StringProcessor::split(parameters[0], "=");
+                previousParamName =  StringProcessor::trimmed(firstParameter[0]);
             }
+            Json::Value jsonParameter = Json::Value(Json::arrayValue);
+            for (std::vector<std::string>::iterator it = parameters.begin(); it != parameters.end(); ++it)
+            {
+                auto parameterKeyValue = StringProcessor::split((*it), "=");
+                if (parameterKeyValue.size() == 2)
+                {
+                    auto currentParamName = StringProcessor::trimmed(parameterKeyValue[0]);
+                    std::string decodedStr;
+                    URI::decode(StringProcessor::trimmed(parameterKeyValue[1]), decodedStr);
+                    if(previousParamName != currentParamName)
+                    {
+                        jsonParametersArray[previousParamName] = jsonParameter;
+                        jsonParameter = Json::Value(Json::arrayValue);
+                        previousParamName = currentParamName;
+                    }
+                    jsonParameter.append(decodedStr);
+                    if(it == parameters.end() - 1)
+                        jsonParametersArray[previousParamName] = jsonParameter;
+                }
+            }
+            jsonData["parameters"] = jsonParametersArray;
         }
-        jsonData["parameters"] = jsonParametersArray;
 
         // Attributes Array
         auto attributes = enumerateAttributes();
