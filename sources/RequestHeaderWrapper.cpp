@@ -8,7 +8,7 @@ namespace ssorest
 
     }
 
-    void RequestHeaderWrapper::propagateResponseHeader(const std::map<std::string, std::string>& sourceHeaders, TargetHeader targetHeader)
+    void RequestHeaderWrapper::propagateHeader(const std::map<std::string, std::string>& sourceHeaders, TargetHeader targetHeader)
     {
         auto destinationHeader = (targetHeader == TargetHeader::In ? request->headers_in : request->headers_out);
         for (auto& sourceHeader : sourceHeaders)

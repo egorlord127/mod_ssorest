@@ -13,7 +13,7 @@ namespace ssorest
 
     public:
         RequestHeaderWrapper(request_rec *r);
-        void propagateResponseHeader(const std::map<std::string, std::string>& sourceHeader, TargetHeader targetHeader);
+        void propagateHeader(const std::map<std::string, std::string>& sourceHeader, TargetHeader targetHeader);
         void propagateCookies(const std::map<std::string, std::string>& sourceCookies, TargetHeader targetHeader);
     };
 }

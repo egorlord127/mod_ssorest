@@ -158,7 +158,15 @@ namespace ssorest
                 
                 // Transfer REQUEST headers (hint: not responses!)
                 auto requestHeaders = response.getRequestHeader();
-                requestHeaderWrapper.propagateResponseHeader(requestHeaders, RequestHeaderWrapper::TargetHeader::In);
+                std::map<std::string, std::string>::iterator itr = requestHeaders.begin();
+                while (itr != requestHeaders.end()) {
+                    if ((*itr).first == "COOKIE") {
+                        itr = requestHeaders.erase(itr);
+                    } else {
+                        ++itr;
+                    }
+                }
+                requestHeaderWrapper.propagateHeader(requestHeaders, RequestHeaderWrapper::TargetHeader::In);
                 
                 // TODO: Transfer new request cookies too! And only the name=value pairs (not the addl cookie attributes)
 
@@ -206,7 +214,7 @@ namespace ssorest
             else
             {
                 RequestHeaderWrapper requestHeaderWrapper(r);
-                requestHeaderWrapper.propagateResponseHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::Out);
+                requestHeaderWrapper.propagateHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::Out);
                 
                 auto additionalCookies = response.getResponseCookies();
                 requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
