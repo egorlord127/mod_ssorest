@@ -18,7 +18,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <sys/stat.h>
 
 using namespace std;
 namespace ssorest
@@ -188,9 +188,15 @@ namespace ssorest
                 else
                 {
                     std::string fileName = localrootpath + std::string(r->uri);
+                    struct stat statBuffer;
+                    ::stat(fileName.c_str(), &statBuffer);
+
                     std::ifstream ifs(fileName);
                     std::string fileContent((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-                    gatewayRequest.set(GatewayRequest::content, fileContent);
+                    gatewayRequest.set(GatewayRequest::content, base64_encode(fileContent.c_str(), fileContent.length()));
+
+                    // TODO: Add Timestamp in GatewayJson
+                    gatewayRequest.set(GatewayRequest::contentTimestamp, std::to_string(statBuffer.st_mtime));
                 }
                 return process(r);
             }
