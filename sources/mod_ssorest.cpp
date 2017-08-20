@@ -259,13 +259,9 @@ static const char* setIgnoreUrl(cmd_parms* command, void* /*config*/, const char
 
 static int processRequest(request_rec* r) {
     int httpResult = OK;
-    // auto ssorestplugin = getSSORestPluginFrom(r->server);
-    // httpResult = ssorestplugin->process(r);
-    // Logger::emerg(r, "Request to Gateway had result code: %d", httpResult);
-    std::string fileName = std::string("/opt/tomcat/webapps/") + std::string(r->uri);
-    std::ifstream ifs(fileName);
-    std::string fileContent((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-    Logger::emerg(r, "Request to Gateway had result code: %s", fileContent.c_str());
+    auto ssorestplugin = getSSORestPluginFrom(r->server);
+    httpResult = ssorestplugin->process(r);
+    Logger::emerg(r, "Request to Gateway had result code: %d", httpResult);
     return httpResult;
 }
 

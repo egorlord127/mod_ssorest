@@ -3,7 +3,6 @@
 #include "GatewayResponse.h"
 #include "RequestHeaderWrapper.h"
 #include "Logger.h"
-#include "File.h"
 #include "StringProcessor.h"
 #include "Cryptography/Cryptor.h"
 #include "Base64.h"
@@ -188,7 +187,10 @@ namespace ssorest
                 }
                 else
                 {
-                    // TODO: LocalSendFile Handling here?
+                    std::string fileName = localrootpath + std::string(r->uri);
+                    std::ifstream ifs(fileName);
+                    std::string fileContent((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+                    gatewayRequest.set(GatewayRequest::content, fileContent);
                 }
                 return process(r);
             }
