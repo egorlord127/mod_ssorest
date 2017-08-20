@@ -15,8 +15,15 @@ namespace ssorest
         {
             auto& name = sourceHeader.first;
             auto& value = sourceHeader.second;
+
+            if (name == "gatewayToken")
+            {
+                Logger::emerg(request, "Plugin stored gatwayToken=%s, len=%d", value.c_str(), value.size());
+                continue;
+            }
             Logger::emerg(request, "Propagating request header: %s=%s", name.c_str(), value.c_str());
             ::apr_table_set(destinationHeader, name.c_str(), value.c_str());
+            
         }
     }
 
