@@ -74,7 +74,7 @@ namespace ssorest
         return !jsonValue.isNull();
     }
 
-    std::map<std::string, std::string> GatewayResponse::getResponseHeader() const
+    std::map<std::string, std::string> GatewayResponse::getJsonResponseHeader() const
     {
         std::map<std::string, std::string> responseHeader;
         try {
@@ -118,7 +118,7 @@ namespace ssorest
         return requestHeader;
     }
     
-    std::map<std::string, std::string> GatewayResponse::getResponseCookies() const
+    std::map<std::string, std::string> GatewayResponse::getJsonResponseCookies() const
     {
         std::map<std::string, std::string> cookies;
         try {

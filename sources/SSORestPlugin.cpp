@@ -140,7 +140,7 @@ namespace ssorest
             
             GatewayResponse response(gatewayRequest.sendTo(gatewayUrl, traceEnabled));
             auto jsonResponse = response.getJsonResponse();
-            auto responseHeaders = response.getResponseHeader();
+            auto responseHeaders = response.getJsonResponseHeader();
             auto status = response.getJsonResponseStatus();
 
             Logger::styledDebug(r, "Parsed reply from Gateway: " + jsonResponse.toStyledString());
@@ -171,7 +171,7 @@ namespace ssorest
                 // TODO: Transfer new request cookies too! And only the name=value pairs (not the addl cookie attributes)
 
                 //Transfer any new cookies to the response
-                auto additionalCookies = response.getResponseCookies();
+                auto additionalCookies = response.getJsonResponseCookies();
                 requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
                 Logger::notice(r, "Exiting handleAllowContinue");
                 return (OK);
@@ -214,11 +214,25 @@ namespace ssorest
             else
             {
                 RequestHeaderWrapper requestHeaderWrapper(r);
-                requestHeaderWrapper.propagateHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::Out);
+                if (responseHeaders.size())
+                {
+                    requestHeaderWrapper.propagateHeader(responseHeaders, RequestHeaderWrapper::TargetHeader::Out);
+                }
+                else 
+                {
+                    Logger::notice(r, "No headers in JSON response");
+                }
                 
-                auto additionalCookies = response.getResponseCookies();
-                requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
-                
+                auto additionalCookies = response.getJsonResponseCookies();
+                if (additionalCookies.size())
+                {
+                    requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
+                }                    
+                else 
+                {
+                    Logger::notice(r, "No cookies in JSON response");
+                }
+
                 if(response.isResponseBodySet())
                 {
                     auto moduleResponse = base64_decode(response.getResponseBody());
