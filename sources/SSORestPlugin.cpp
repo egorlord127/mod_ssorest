@@ -92,11 +92,11 @@ namespace ssorest
         sourceRequest = r;
         if(!isEnabled)
         {
-            Logger::notice(r, "SSO/Rest Plugin is disabled");
+            Logger::emerg(r, "SSO/Rest Plugin is disabled");
             return DECLINED;
         }
         
-        Logger::notice(r, "Processing new request");
+        Logger::emerg(r, "Processing new request");
 
         if (r->uri)
         {
@@ -107,7 +107,7 @@ namespace ssorest
             {
                 if (std::find(ignoreExt.begin(), ignoreExt.end(), fileext) != ignoreExt.end())
                 {
-                    Logger::notice(r, "Ignore Extension Matched");
+                    Logger::emerg(r, "Ignore Extension Matched");
                     return OK;
                 }
             }
@@ -118,14 +118,14 @@ namespace ssorest
                 std::string uri(r->uri);
                 if (uri.find(*it) != std::string::npos)
                 {
-                    Logger::notice(r, "Ignore Url Matched");
+                    Logger::emerg(r, "Ignore Url Matched");
                     return OK;
                 }
             }
 
             if(gatewayUrl.empty())
             {
-                Logger::notice(r, "No SSORestGatewayUrl in configuration");
+                Logger::emerg(r, "No SSORestGatewayUrl in configuration");
                 return (HTTP_FORBIDDEN);
             }
 
@@ -148,19 +148,22 @@ namespace ssorest
 
             auto gatewayTokenIterator = responseHeaders.find("gatewayToken");
             if (gatewayTokenIterator != responseHeaders.cend())
+            {
                 gatewayToken = gatewayTokenIterator->second;
-
+                Logger::emerg(r, "Plugin stored gatwayToken=%s, len=%d", gatewayToken.c_str(), gatewayToken.size());
+            }
+            
             if (status == HTTP_CONTINUE)
             {
-                Logger::notice(r, "Entering handleAllowContinue");
+                Logger::emerg(r, "Entering handleAllowContinue");
                 
                 RequestHeaderWrapper requestHeaderWrapper(r);
                 
                 // Transfer REQUEST headers (hint: not responses!)
-                auto requestHeaders = response.getRequestHeader();
+                auto requestHeaders = response.getJsonRequestHeader();
                 std::map<std::string, std::string>::iterator itr = requestHeaders.begin();
                 while (itr != requestHeaders.end()) {
-                    if ((*itr).first == "COOKIE") {
+                    if (StringProcessor::toUpperCase((*itr).first) == "COOKIE") {
                         itr = requestHeaders.erase(itr);
                     } else {
                         ++itr;
@@ -172,8 +175,13 @@ namespace ssorest
 
                 //Transfer any new cookies to the response
                 auto additionalCookies = response.getJsonResponseCookies();
-                requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
-                Logger::notice(r, "Exiting handleAllowContinue");
+                if (additionalCookies.size())
+                    requestHeaderWrapper.propagateCookies(additionalCookies, RequestHeaderWrapper::TargetHeader::Out);
+                else
+                    Logger::emerg(r, "No cookies in JSON response"); 
+                    
+                    
+                Logger::emerg(r, "Exiting handleAllowContinue");
                 return (OK);
             }
             else if (status == HTTP_NOT_EXTENDED)
@@ -183,11 +191,11 @@ namespace ssorest
                 {
                     // Generate RandomText and RandomTextSigned String
                     auto randomText = RandomSequence::generate(32);
-                    Logger::notice(r, "Generated randomText: %s", randomText.c_str());
+                    Logger::emerg(r, "Generated randomText: %s", randomText.c_str());
                     Cryptor::HMACSHA1Digest digest;
                     Cryptor::computeHMACSHA1(randomText, secretKey, digest);
                     auto signedRandomText = base64_encode(digest.data(), static_cast<unsigned int>(digest.size()));
-                    Logger::notice(r, "Generated HMAC: %s", signedRandomText.c_str());
+                    Logger::emerg(r, "Generated HMAC: %s", signedRandomText.c_str());
                     
                     std::string encodedSignedRandomText;
                     URI::encode(signedRandomText, encodedSignedRandomText);
@@ -220,7 +228,7 @@ namespace ssorest
                 }
                 else 
                 {
-                    Logger::notice(r, "No headers in JSON response");
+                    Logger::emerg(r, "No headers in JSON response");
                 }
                 
                 auto additionalCookies = response.getJsonResponseCookies();
@@ -230,7 +238,7 @@ namespace ssorest
                 }                    
                 else 
                 {
-                    Logger::notice(r, "No cookies in JSON response");
+                    Logger::emerg(r, "No cookies in JSON response");
                 }
 
                 if(response.isResponseBodySet())

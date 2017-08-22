@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <httpd.h>
+#include "Cookie.h"
 namespace ssorest
 {
     class RequestHeaderWrapper{
@@ -14,6 +15,6 @@ namespace ssorest
     public:
         RequestHeaderWrapper(request_rec *r);
         void propagateHeader(const std::map<std::string, std::string>& sourceHeader, TargetHeader targetHeader);
-        void propagateCookies(const std::map<std::string, std::string>& sourceCookies, TargetHeader targetHeader);
+        void propagateCookies(const std::map<std::string, Cookie>& sourceCookies, TargetHeader targetHeader);
     };
 }

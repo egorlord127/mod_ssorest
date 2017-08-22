@@ -17,12 +17,12 @@ namespace ssorest
             auto& name = sourceHeader.first;
             auto& value = sourceHeader.second;
 
+            if (targetHeader == TargetHeader::In)
+                Logger::emerg(request, "Propagating request header: %s=%s", name.c_str(), value.c_str());
+
             Logger::emerg(request, "Processing %s header from JSon: %s", strDir.c_str(), name.c_str());
             if (name == "gatewayToken")
-            {
-                Logger::emerg(request, "Plugin stored gatwayToken=%s, len=%d", value.c_str(), value.size());
                 continue;
-            }
             
             Logger::emerg(request, "Setting %s header to : %s", name.c_str(), value.c_str());
             ::apr_table_set(destinationHeader, name.c_str(), value.c_str());
@@ -30,7 +30,7 @@ namespace ssorest
         }
     }
 
-    void RequestHeaderWrapper::propagateCookies(const std::map<std::string, std::string>& sourceCookies, TargetHeader targetHeader)
+    void RequestHeaderWrapper::propagateCookies(const std::map<std::string, Cookie>& sourceCookies, TargetHeader targetHeader)
     {
         std::string mergedCookies;
         auto destinationHeader = (targetHeader == TargetHeader::In ? request->headers_in : request->headers_out);
@@ -42,7 +42,7 @@ namespace ssorest
         {
             if (!mergedCookies.empty())
                 mergedCookies += "; ";
-            mergedCookies += sourceCookie.first + "=" + sourceCookie.second;
+            mergedCookies += sourceCookie.first + "=" + sourceCookie.second.value;
 
             // TODO: Add Additional Cookie Attributes (hint: only in case of response)
         }

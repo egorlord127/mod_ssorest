@@ -1,4 +1,5 @@
 #include "GatewayResponse.h"
+#include "Cookie.h"
 namespace ssorest
 {
     GatewayResponse::GatewayResponse(const std::string& jsonResponse)
@@ -96,7 +97,7 @@ namespace ssorest
         return responseHeader;
     }
 
-    std::map<std::string, std::string> GatewayResponse::getRequestHeader() const
+    std::map<std::string, std::string> GatewayResponse::getJsonRequestHeader() const
     {
         std::map<std::string, std::string> requestHeader;
         try {
@@ -118,18 +119,26 @@ namespace ssorest
         return requestHeader;
     }
     
-    std::map<std::string, std::string> GatewayResponse::getJsonResponseCookies() const
+    std::map<std::string, Cookie> GatewayResponse::getJsonResponseCookies() const
     {
-        std::map<std::string, std::string> cookies;
+        std::map<std::string, Cookie> cookies;
         try {
-            auto jsonCookies = subresponse["cookies"];
+            auto& jsonCookies = subresponse["cookies"];
             if (!jsonCookies.isNull())
             {
                 for (auto i = jsonCookies.begin(); i != jsonCookies.end(); ++i)   
                 {
-                    auto name = i.key().asString();
-                    auto value = (*i)[static_cast<Json::Value::ArrayIndex>(0)].asString();
-                    cookies[name] = value;
+                    const Json::Value& jsonCookie = *i;
+                    Cookie cookie;
+                    cookie.name = jsonCookie["name"].asString();
+                    cookie.value = jsonCookie["value"].asString();
+                    cookie.path = jsonCookie["path"].asString();
+                    cookie.domain = jsonCookie["domain"].asString();
+                    cookie.maxAge = jsonCookie["maxAge"].asInt();
+                    cookie.version = jsonCookie["version"].asUInt();
+                    cookie.secure = jsonCookie["secure"].asBool();
+                    cookie.httpOnly = jsonCookie["httpOnly"].asBool();
+                    cookies[cookie.name] = cookie;
                 }
             }
         }

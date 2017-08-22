@@ -3,7 +3,7 @@
 #include "json/json.h"
 #include <map>
 #include <string>
-
+#include "Cookie.h"
 namespace ssorest
 {
     class GatewayResponse
@@ -26,8 +26,8 @@ namespace ssorest
         bool isResponseBodySet() const;
 
         std::map<std::string, std::string> getJsonResponseHeader() const;
-        std::map<std::string, std::string> getJsonResponseCookies() const;
-        std::map<std::string, std::string> getRequestHeader() const;
+        std::map<std::string, Cookie> getJsonResponseCookies() const;
+        std::map<std::string, std::string> getJsonRequestHeader() const;
         
     };
 }
