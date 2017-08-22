@@ -44,6 +44,29 @@ namespace ssorest
                 mergedCookies += "; ";
             mergedCookies += sourceCookie.first + "=" + sourceCookie.second.value;
 
+            if (sourceCookie.maxAge > 0)
+            {
+                mergedCookies += "; expires=";
+            }
+            else if (sourceCookie.maxAge == 0)
+            {
+                mergedCookies += "; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            }
+
+            if (!sourceCookie.domain.empty())
+            {
+                mergedCookies += "; domain=" + sourceCookie.domain;
+            }
+
+            if (!sourceCookie.domain.empty())
+            {
+                mergedCookies += "; domain=" + sourceCookie.domain;
+            }
+
+            if (!sourceCookie.domain.empty())
+            {
+                mergedCookies += "; domain=" + sourceCookie.domain;
+            }
             // TODO: Add Additional Cookie Attributes (hint: only in case of response)
         }
 
